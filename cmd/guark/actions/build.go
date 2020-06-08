@@ -28,7 +28,7 @@ var (
 		},
 		&cli.StringSliceFlag{
 			Name:  "target",
-			Usage: "Set build targets (linux, darwin, windows)",
+			Usage: "Set build targets",
 			Value: cli.NewStringSlice(supportedOses...),
 		},
 	}

@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/guark/guark/app/utils"
 	"github.com/guark/guark/cmd/guark/actions"
 	"github.com/urfave/cli/v2"
 )
@@ -31,22 +30,26 @@ func init() {
 				Name:   "build",
 				Usage:  "Build guark app.",
 				Flags:  actions.BuildFlags,
+				Before: actions.CheckWorkingDir,
 				Action: actions.Build,
 			},
 			{
 				Name:   "run",
 				Usage:  "Build and run guark app.",
+				Before: actions.CheckWorkingDir,
 				Action: run,
 			},
 			{
 				Name:   "dev",
 				Usage:  "Start dev app.",
 				Flags:  actions.DevFlags,
+				Before: actions.CheckWorkingDir,
 				Action: actions.Dev,
 			},
 			{
 				Name:   "generate",
 				Usage:  "Generate embedable static files and assets.",
+				Before: actions.CheckWorkingDir,
 				Action: actions.Generate,
 			},
 		},
@@ -59,10 +62,6 @@ func run(c *cli.Context) error {
 }
 
 func main() {
-
-	if utils.IsFile("guark.yaml") == false {
-		log.Fatal(fmt.Errorf("could not find: guark.yaml, cd to a guark project!"))
-	}
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)

@@ -5,7 +5,11 @@ package actions
 
 import (
 	"os"
+	"fmt"
 	"path/filepath"
+
+	"github.com/urfave/cli/v2"
+	"github.com/guark/guark/app/utils"
 )
 
 var wdir string
@@ -23,4 +27,14 @@ func init() {
 
 func path(elem ...string) string {
 	return filepath.Join(append([]string{wdir}, elem...)...)
+}
+
+
+func CheckWorkingDir(c *cli.Context) (err error) {
+
+	if utils.IsFile("guark.yaml") == false {
+		err = fmt.Errorf("could not find: guark.yaml, cd to a guark project!")
+	}
+
+	return
 }
