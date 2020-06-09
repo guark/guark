@@ -5,41 +5,53 @@ package stdio
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/guark/guark/cmd/guark/stdio/uilive"
+	"github.com/theckman/yacspin"
 	colors "github.com/logrusorgru/aurora"
 )
 
+var cfg = &yacspin.Config{
+	Frequency:       100 * time.Millisecond,
+	CharSet:         yacspin.CharSets[14],
+}
+
 type Output struct {
-	Writer *uilive.Writer
+	spinner *yacspin.Spinner
 }
 
-func (o Output) Update(s string, icon string) {
+func (o Output) Update(s string) {
 
-	if icon == "" {
-		icon = "●"
+	if o.spinner.Active() == false {
+		o.spinner.Start()
 	}
 
-	fmt.Fprintf(o.Writer, "%s %s", colors.Bold(colors.Cyan(icon)), colors.Bold(colors.Blue(s)))
+	o.spinner.Message(fmt.Sprintf(" %s", colors.Bold(colors.Blue(s))))
 }
 
-func (o Output) End(s string, icon string) {
+func (o Output) Done(s string) {
+	o.spinner.Stop()
+	fmt.Println(fmt.Sprintf("%s %s", colors.Green("✔"), colors.Cyan(s)))
+}
 
-	if icon == "" {
-		icon = "✔"
-	}
+func (o Output) Err(s string) {
+	o.spinner.Stop()
+	fmt.Println(colors.Red(fmt.Sprintf("✘ %s", s)))
+}
 
-	fmt.Println(fmt.Sprintf("%s %s", colors.Green(icon), colors.Cyan(s)))
-	o.Writer.Stop()
-	o.Writer.Start()
+func (o Output) Stop() {
+	o.spinner.Stop()
 }
 
 func NewWriter() *Output {
 
-	w := uilive.New()
-	w.Start()
+	y, err := yacspin.New(*cfg)
+
+	if err != nil {
+		panic(err)
+	}
 
 	return &Output{
-		Writer: w,
+		spinner: y,
 	}
 }
