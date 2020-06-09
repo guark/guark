@@ -47,21 +47,24 @@ func Dev(c *cli.Context) error {
 		return err
 	}
 
-	out.Update("Wating for UI dev server to start...", "")
+	out.Update("Waiting for UI dev server to start...")
 
 	os.Remove(lock)
 
 	cmd, cancel = serve(c.String("pkg"), port)
+	defer teardown(cmd, cancel)
 
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		<-sig
-		out.End("", "🙊")
-		out.End("Cleanup before exit.", "🧹")
+		fmt.Println()
 		teardown(cmd, cancel)
+		out.Done("Cleanup before exit.")
 		os.Exit(1)
 	}()
+
+	out.Stop()
 
 	for {
 
@@ -72,12 +75,9 @@ func Dev(c *cli.Context) error {
 		}
 	}
 
-	out.End("UI server started successfully.", "▶")
+	out.Done("UI server started successfully.")
 
-	err = start(port, out)
-	teardown(cmd, cancel)
-
-	return err
+	return start(port, out)
 }
 
 func serve(pkg string, port string) (*exec.Cmd, context.CancelFunc) {
@@ -102,7 +102,7 @@ func start(port string, out *stdio.Output) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	out.End("Starting guark dev app...", "▶")
+	out.Done("Starting guark dev app...")
 	return cmd.Run()
 }
 
