@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	buildTmpDir   string
+	buildDest     string
 	supportedOses = []string{"linux", "darwin", "windows"}
 	BuildFlags    = []cli.Flag{
 		&cli.StringFlag{
@@ -30,6 +30,10 @@ var (
 			Name:  "target",
 			Usage: "Set build targets",
 			Value: cli.NewStringSlice(supportedOses...),
+		},
+		&cli.StringFlag{
+			Name:  "dest",
+			Usage: "Build to a specific destination.",
 		},
 	}
 )
@@ -51,25 +55,33 @@ func Build(c *cli.Context) (err error) {
 		}
 	}
 
-	buildTmpDir, err = ioutil.TempDir("", "guark")
-
-	if err != nil {
-		return
-	}
-
-	defer os.RemoveAll(buildTmpDir)
-
 	out.End("Guark build initialized ⚙️", "")
 
-	if err = buildUI(c.String("pkg"), buildTmpDir); err != nil {
+	if c.String("dest") != "" {
+
+		buildDest = c.String("dest")
+
+	} else {
+
+		buildDest, err = ioutil.TempDir("", "guark")
+
+		if err != nil {
+			return
+		}
+
+		// Clear tmp.
+		defer os.RemoveAll(buildDest)
+	}
+
+	if err = buildUI(c.String("pkg"), buildDest); err != nil {
 		return
 	}
 
 	out.End("Guark UI builded 🙈", "")
 
-	staticDir := filepath.Join(buildTmpDir, "static")
+	staticDir := filepath.Join(buildDest, "static")
 
-	if err = index(buildTmpDir, staticDir); err != nil {
+	if err = index(buildDest, staticDir); err != nil {
 		return
 	}
 
@@ -77,15 +89,18 @@ func Build(c *cli.Context) (err error) {
 
 	for i := range targets {
 
-		if err = build(targets[i], buildTmpDir); err != nil {
+		if err = build(targets[i], buildDest); err != nil {
 			return
 		}
 
 		out.End(fmt.Sprintf("Guark build for %s 🙊", targets[i]), "")
 	}
 
-	defer out.End("Guark build finished 🚀🚀", "")
+	if c.String("dest") == "" {
+		// move things.
+	}
 
+	out.End("Guark build finished 🚀🚀", "")
 	return
 }
 
