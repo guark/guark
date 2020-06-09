@@ -11,6 +11,7 @@ import (
 	"fmt"
 )
 
+// TODO: add darwin cross compile build flags.
 func getBuildFlagsAndEnvFor(target string, buildDir string) (flags []string, env []string) {
 
 	switch target {
@@ -25,5 +26,5 @@ func getBuildFlagsAndEnvFor(target string, buildDir string) (flags []string, env
 		return
 	}
 
-	panic(fmt.Sprintf("Inavlid target %s", target))
+	panic(fmt.Sprintf("target %s not supported yet.", target))
 }
