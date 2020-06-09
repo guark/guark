@@ -33,6 +33,12 @@ func init() {
 				Before: actions.CheckWorkingDir,
 				Action: actions.Dev,
 			},
+			{
+				Name: "new",
+				Usage: "Create new guark project.",
+				Flags: actions.NewFlags,
+				Action: actions.New,
+			},
 		},
 	}
 }
