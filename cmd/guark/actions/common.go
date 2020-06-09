@@ -4,12 +4,14 @@
 package actions
 
 import (
-	"os"
 	"fmt"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
-	"github.com/urfave/cli/v2"
 	"github.com/guark/guark/app/utils"
+	"github.com/urfave/cli/v2"
 )
 
 var wdir string
@@ -29,7 +31,6 @@ func path(elem ...string) string {
 	return filepath.Join(append([]string{wdir}, elem...)...)
 }
 
-
 func CheckWorkingDir(c *cli.Context) (err error) {
 
 	if utils.IsFile("guark.yaml") == false {
@@ -37,4 +38,16 @@ func CheckWorkingDir(c *cli.Context) (err error) {
 	}
 
 	return
+}
+
+func getHost() string {
+
+	cmd := exec.Command("go", "env", "GOHOSTOS")
+	out, err := cmd.Output()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return strings.TrimSpace(string(out))
 }
