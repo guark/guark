@@ -21,7 +21,7 @@ func init() {
 		Commands: []*cli.Command{
 			{
 				Name:   "build",
-				Usage:  "Build guark app.",
+				Usage:  "Bundle and build guark app.",
 				Flags:  actions.BuildFlags,
 				Before: actions.CheckWorkingDir,
 				Action: actions.Build,
