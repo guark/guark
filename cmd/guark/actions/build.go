@@ -46,7 +46,6 @@ func Build(c *cli.Context) (err error) {
 
 	out := stdio.NewWriter()
 	targets := c.StringSlice("target")
-	defer out.Writer.Stop()
 
 	for i := range targets {
 
@@ -55,7 +54,7 @@ func Build(c *cli.Context) (err error) {
 		}
 	}
 
-	out.End("Guark build initialized ⚙️", "")
+	out.Done("Guark build initialized ⚙️")
 
 	if c.String("dest") != "" {
 
@@ -73,11 +72,17 @@ func Build(c *cli.Context) (err error) {
 		defer os.RemoveAll(buildDest)
 	}
 
-	if err = buildUI(c.String("pkg"), buildDest); err != nil {
+	out.Update("Building app ui.")
+
+	o, err := buildUI(c.String("pkg"), buildDest)
+
+	if err != nil {
+
+		fmt.Println(string(o))
 		return
 	}
 
-	out.End("Guark UI builded 🙈", "")
+	out.Done("Guark UI builded 🙈")
 
 	staticDir := filepath.Join(buildDest, "static")
 
@@ -85,7 +90,7 @@ func Build(c *cli.Context) (err error) {
 		return
 	}
 
-	out.End("Guark UI indexed 🙉", "")
+	out.Done("Guark UI indexed 🙉")
 
 	for i := range targets {
 
@@ -93,14 +98,14 @@ func Build(c *cli.Context) (err error) {
 			return
 		}
 
-		out.End(fmt.Sprintf("Guark build for %s 🙊", targets[i]), "")
+		out.Done(fmt.Sprintf("Guark build for %s 🙊", targets[i]))
 	}
 
 	if c.String("dest") == "" {
 		// move things.
 	}
 
-	out.End("Guark build finished 🚀🚀", "")
+	out.Done("Guark build finished 🚀🚀")
 	return
 }
 
@@ -140,14 +145,13 @@ func pkgPath(v interface{}) string {
 	return val.Type().PkgPath()
 }
 
-func buildUI(pkg string, dir string) error {
+func buildUI(pkg string, dir string) ([]byte, error) {
 
 	cmd := exec.Command(pkg, "build")
 	cmd.Dir = path("ui")
 	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_BUILD_DIR=%s/ui", dir))
-	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	return cmd.CombinedOutput()
 }
 
 func getBuildDir(target string, dir string) (string, error) {

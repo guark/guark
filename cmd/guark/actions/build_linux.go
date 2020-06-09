@@ -11,6 +11,7 @@ import (
 	"fmt"
 )
 
+// // https://blog.svgames.pl/article/cross-compiling-c-programs-for-ms-windows-using-mingw
 // TODO: add darwin cross compile build flags.
 func getBuildFlagsAndEnvFor(target string, buildDir string) (flags []string, env []string) {
 
