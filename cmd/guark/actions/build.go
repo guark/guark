@@ -182,5 +182,5 @@ func index(dir string, staticDir string) error {
 		return err
 	}
 
-	return generator.Assets(filepath.Join(dir, "ui"), staticDir, path("lib", "static.go"), "lib", filepath.Join(dir, "ui"))
+	return generator.Assets(filepath.Join(dir, "ui"), staticDir, path("lib", "assets.go"), "lib", filepath.Join(dir, "ui"))
 }
