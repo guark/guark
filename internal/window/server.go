@@ -6,15 +6,16 @@ package window
 import (
 	"fmt"
 	"net"
+	"os"
 
 	"github.com/guark/guark/app"
 	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
-	App    *app.App
-	Log    *logrus.Entry
-	Port   string
+	App *app.App
+	Log *logrus.Entry
+	// Port   string
 	Root   string
 	ln     net.Listener
 	ran    bool
@@ -39,13 +40,13 @@ func (s *Server) Start() {
 	s.window.Webview.Run()
 }
 
-func (s *Server) Addr() string {
+func (s Server) Addr() string {
 
 	if s.ln != nil {
 		return s.ln.Addr().String()
 	}
 
-	return fmt.Sprintf("http://127.0.0.1:%s", s.Port)
+	return fmt.Sprintf("http://127.0.0.1:%s", os.Getenv("GUARK_DEBUG_PORT"))
 }
 
 func (s *Server) Stop() {
