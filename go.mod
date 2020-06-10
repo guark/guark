@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
+	github.com/manifoldco/promptui v0.7.0
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
