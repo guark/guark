@@ -4,14 +4,14 @@
 package actions
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"net/http"
-	"io/ioutil"
-	"encoding/json"
-	"net/url"
 
 	"github.com/guark/guark/app/utils"
 	"github.com/urfave/cli/v2"
@@ -41,8 +41,6 @@ func getHost() string {
 
 	return strings.TrimSpace(string(out))
 }
-
-
 
 func GitFile(repo string, file string, auth string) (content []byte, e error) {
 
@@ -93,7 +91,6 @@ func getBitbucketFile(url *url.URL, file string, auth string) ([]byte, error) {
 	return GetContentFromUrl(fmt.Sprintf("https://api.bitbucket.org/2.0/repositories%s/src/master/%s", url.Path, file), auth)
 }
 
-
 func GetContentFromUrl(url string, auth string) (content []byte, e error) {
 
 	res, e := http.Get(UrlAuth(url, auth))
@@ -106,7 +103,7 @@ func GetContentFromUrl(url string, auth string) (content []byte, e error) {
 
 	if res.StatusCode != http.StatusOK {
 
-		e = fmt.Errorf("Request error: %v for %s", res.StatusCode, strings.Replace(url, auth + "@", "", 1))
+		e = fmt.Errorf("Request error: %v for %s", res.StatusCode, strings.Replace(url, auth+"@", "", 1))
 		return
 	}
 
@@ -134,4 +131,3 @@ func UrlAuth(url string, auth string) string {
 
 	return url
 }
-

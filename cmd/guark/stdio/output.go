@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/theckman/yacspin"
 	colors "github.com/logrusorgru/aurora"
+	"github.com/theckman/yacspin"
 )
 
 var cfg = &yacspin.Config{
-	Frequency:       100 * time.Millisecond,
-	CharSet:         yacspin.CharSets[14],
+	Frequency: 100 * time.Millisecond,
+	CharSet:   yacspin.CharSets[14],
 }
 
 type Output struct {
