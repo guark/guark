@@ -4,8 +4,7 @@
 package guark
 
 import (
-	"os"
-
+	"fmt"
 	"github.com/guark/guark/app"
 	"github.com/guark/guark/internal/window"
 	"github.com/sirupsen/logrus"
@@ -20,47 +19,36 @@ type Guark struct {
 
 func (g *Guark) Run() (err error) {
 
-	var logLevel logrus.Level = logrus.WarnLevel
-
-	g.App = &app.App{
-		Log: logrus.WithFields(logrus.Fields{"context": "app"}),
-	}
+	var logLevel logrus.Level
 
 	if g.App.IsDev() {
+
+		err = UnmarshalGuarkFile("guark.yaml", g.App)
+
+		if err != nil {
+			g.log.Error(err)
+			return
+		}
 
 		logLevel = logrus.DebugLevel
 		logrus.SetFormatter(&logrus.TextFormatter{
 			ForceColors: true,
 		})
+
+	} else {
+
+		logLevel = logrus.WarnLevel
 	}
 
 	logrus.SetLevel(logLevel)
-
-	g.log.Debug("loading config.")
-
-	g.App.Config, err = app.LoadConfig("guark.yaml")
-
-	if err != nil {
-		g.log.Error(err)
-		return
-	}
 
 	g.log.Debug("config loaded.")
 
 	g.srv.App = g.App
 	g.srv.Root = g.App.Path("static")
-
-	if g.App.Assets != nil {
-		g.App.Assets.Prefix = g.App.Path("assets")
-	}
-
-	// if g.Log == nil {
-	// 	// setup default log here
-	// }
+	g.srv.Log = g.log
 
 	g.log.Debug("starting guark server.")
-
-	g.srv.Log = g.log
 	g.srv.Start()
 	return
 }
@@ -75,12 +63,20 @@ func (g *Guark) Exit() {
 	g.srv.Stop()
 }
 
-func New() *Guark {
+func New(c *app.Config) *Guark {
 
 	return &Guark{
+		App: app.New(c, app.Funcs{
+			"hook": func(c app.Context) (interface{}, error) {
+
+				if c.Params.Has("name") == false {
+					return nil, fmt.Errorf("could not find hook name in params")
+				}
+
+				return nil, c.App.Hooks.Run(c.Params.Get("name").(string), c.App)
+			},
+		}),
 		log: logrus.WithFields(logrus.Fields{"context": "guark"}),
-		srv: &window.Server{
-			Port: os.Getenv("GUARK_DEBUG_PORT"), // this will be ignored on production
-		},
+		srv: &window.Server{},
 	}
 }
