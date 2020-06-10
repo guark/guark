@@ -20,11 +20,12 @@ func init() {
 		Usage: "Guark framework command line interface.",
 		Commands: []*cli.Command{
 			{
-				Name:   "build",
-				Usage:  "Bundle and build guark app.",
-				Flags:  actions.BuildFlags,
-				Before: actions.CheckWorkingDir,
-				Action: actions.Build,
+				Name:    "build",
+				Aliases: []string{"bundle"},
+				Usage:   "Bundle and build guark app.",
+				Flags:   actions.BuildFlags,
+				Before:  actions.CheckWorkingDir,
+				Action:  actions.Build,
 			},
 			{
 				Name:   "dev",
