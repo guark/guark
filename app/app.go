@@ -5,8 +5,9 @@ package app
 
 import (
 	"os"
+	"fmt"
 	"path/filepath"
-
+	"strings"
 	"github.com/guark/guark/app/platform"
 	"github.com/sirupsen/logrus"
 )
@@ -14,14 +15,54 @@ import (
 // App!
 type App struct {
 
-	// App config.
-	Config *Config
+	// Config format version.
+	Guark string `yaml:"guark"`
+
+	// App id must be unique!
+	ID string `yaml:"id"`
+
+	// App name.
+	Name string `yaml:"name"`
+
+	// App version.
+	Version string `yaml:"version"`
+
+	// App license.
+	License string `yaml:"license"`
+
+	// App window state.
+	Window struct {
+		Width  int
+		Height int
+		Hint   int
+	} `yaml:"window"`
+
+	// App log level.
+	LogLevel string `yaml:"logLevel"`
+
+	// Output logs to?
+	LogOutput string `yaml:"logOutput"`
+
+	// App log.
+	Log *logrus.Entry
 
 	// App assets
 	Assets *Assets
 
-	// App log.
-	Log *logrus.Entry
+	// App functios
+	Funcs Funcs
+
+	// App hooks.
+	Hooks Hooks
+
+	// App plugins.
+	Plugins Plugins
+
+	// App watchers.
+	Watchers []Watcher
+
+	// Builtin functions
+	bFuncs Funcs
 }
 
 // Check if app running in dev mode.
@@ -43,5 +84,58 @@ func (a App) Path(elem ...string) string {
 		return filepath.Join(append([]string{cwd, "res"}, elem...)...)
 	}
 
-	return filepath.Join(append([]string{platform.DATA_DIR, a.Config.ID}, elem...)...)
+	return filepath.Join(append([]string{platform.DATA_DIR, a.ID}, elem...)...)
+}
+
+// Call a func.
+func (a *App) Call(fn string, args map[string]interface{}) (interface{}, error) {
+
+	name := strings.Split(fn, ".")
+
+	if len(name) > 2 || fn == "" {
+
+		return nil, fmt.Errorf("Invalid func name: %s", fn)
+
+	} else if len(name) == 2 {
+
+		if _, ok := a.Plugins[name[0]]; ok {
+
+			funcs := a.Plugins[name[0]].GetFuncs()
+
+			if fnc, ok := funcs[name[1]]; ok {
+				return fnc(NewContext(a, args))
+			}
+		}
+
+		return nil, fmt.Errorf("Could not find func name: %s", fn)
+
+	} else if fnc, ok := a.bFuncs[fn]; ok {
+
+		return fnc(NewContext(a, args))
+
+	} else if fnc, ok := a.Funcs[fn]; ok {
+
+		return fnc(NewContext(a, args))
+	}
+
+	return nil, fmt.Errorf("Invalid func call: %s", fn)
+}
+
+
+func New(c *Config, builtin Funcs) *App {
+	app := &App{
+		Log:      logrus.WithFields(logrus.Fields{"context": "app"}),
+		Funcs:    c.Funcs,
+		Hooks:    c.Hooks,
+		Assets:   c.Assets,
+		Plugins:  c.Plugins,
+		Watchers: c.Watchers,
+		bFuncs: builtin,
+	}
+
+	if app.Assets != nil {
+		app.Assets.Prefix = app.Path("assets")
+	}
+
+	return app
 }
