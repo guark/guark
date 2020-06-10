@@ -3,36 +3,35 @@
 
 package actions
 
-
 import (
+	"bytes"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
-	"fmt"
-	"bytes"
-	"strings"
-	"io/ioutil"
 	"path/filepath"
-	"gopkg.in/yaml.v2"
-	"github.com/urfave/cli/v2"
-	"github.com/manifoldco/promptui"
-	"github.com/guark/guark/cmd/guark/stdio"
-)
+	"strings"
 
+	"github.com/guark/guark/cmd/guark/stdio"
+	"github.com/manifoldco/promptui"
+	"github.com/urfave/cli/v2"
+	"gopkg.in/yaml.v2"
+)
 
 var (
 	NewFlags = []cli.Flag{
 		&cli.StringFlag{
-			Name:  "template",
+			Name:    "template",
 			Aliases: []string{"from"},
-			Usage: "init new project from a remote template.",
+			Usage:   "init new project from a remote template.",
 		},
 		&cli.StringFlag{
-			Name: "dest",
+			Name:  "dest",
 			Usage: "template destination path.",
 		},
 		&cli.StringFlag{
-			Name: "mod",
+			Name:  "mod",
 			Usage: "Your app module name.",
 		},
 	}
@@ -40,19 +39,18 @@ var (
 
 // UI setup commands
 type setup struct {
-	Version string `yaml:"guark"`
+	Version  string `yaml:"guark"`
 	Commands []struct {
-		Cmd string `yaml:"cmd"`
+		Cmd  string   `yaml:"cmd"`
 		Args []string `yaml:"args"`
 	} `yaml:"setup"`
 }
 
-
 func New(c *cli.Context) (err error) {
 
 	var (
-		out = stdio.NewWriter()
-		dest = path(c.String("dest"))
+		out      = stdio.NewWriter()
+		dest     = path(c.String("dest"))
 		template string
 	)
 
@@ -90,11 +88,11 @@ func New(c *cli.Context) (err error) {
 	out.Done("Template downloaded successfully.")
 
 	prompt := promptui.Prompt{
-		Label:    "Type your app module name",
-		Default: "github.com/melbahja/myapp",
+		Label:     "Type your app module name",
+		Default:   "github.com/melbahja/myapp",
 		AllowEdit: true,
 		Templates: &promptui.PromptTemplates{
-			Valid:  "⏺ {{ . | cyan }}: ",
+			Valid:   "⏺ {{ . | cyan }}: ",
 			Success: `{{ green "✔"}} {{ cyan "App module name:" }} `,
 		},
 	}
@@ -118,16 +116,14 @@ func New(c *cli.Context) (err error) {
 	return
 }
 
-
 func clone(repo string, dir string) error {
 	cmd := exec.Command("git", "clone", repo, dir)
 	return cmd.Run()
 }
 
-
 func refactorMod(mod string, dest string) error {
 
-	return filepath.Walk(dest, func (path string, f os.FileInfo, err error) error {
+	return filepath.Walk(dest, func(path string, f os.FileInfo, err error) error {
 
 		if err != nil {
 
@@ -148,7 +144,6 @@ func refactorMod(mod string, dest string) error {
 	})
 }
 
-
 func setupUI(dir string) error {
 
 	data, err := ioutil.ReadFile(filepath.Join(dir, "ui", "guark-setup.yaml"))
@@ -159,7 +154,7 @@ func setupUI(dir string) error {
 
 	sup := setup{}
 
-	if err = yaml.Unmarshal(data, &sup);  err != nil {
+	if err = yaml.Unmarshal(data, &sup); err != nil {
 		return err
 	}
 
@@ -179,9 +174,9 @@ func confirmAndRun(s setup, dest string) error {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Do you want to run setup commands on your machine",
+		Label:     "Do you want to run setup commands on your machine",
 		IsConfirm: true,
-		Validate: func (v string) error {
+		Validate: func(v string) error {
 
 			if v == "y" {
 				return fmt.Errorf("Are you sure? type uppercase Y.")
@@ -212,7 +207,6 @@ func confirmAndRun(s setup, dest string) error {
 	return err
 }
 
-
 func runSetupCommand(dir string, c string, args []string) error {
 	cmd := exec.Command(c, args...)
 	cmd.Dir = filepath.Join(dir, "ui")
@@ -224,7 +218,7 @@ func runSetupCommand(dir string, c string, args []string) error {
 func isCleanDir(dir string) bool {
 
 	var (
-		d *os.File
+		d   *os.File
 		err error
 	)
 
