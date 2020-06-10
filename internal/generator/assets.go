@@ -38,17 +38,14 @@ import (
 	"github.com/guark/guark/app"
 )
 
-var Assets app.Assets
-
-func init() {
-	Assets = app.Assets{
-		Index: map[string]string{
-			{{- range $name, $embed := .embeds }}
-			"{{ $name }}": "{{ uuid $name $embed }}",
-			{{- end }}
-		},
-	}
+var Assets = &app.Assets{
+	Index: map[string]string{
+		{{- range $name, $embed := .embeds }}
+		"{{ $name }}": "{{ uuid $name $embed }}",
+		{{- end }}
+	},
 }
+
 `, pkg)
 
 	e := &EmbedGenerator{
