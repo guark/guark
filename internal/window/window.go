@@ -14,11 +14,12 @@ type Window struct {
 func NewWindow(s *Server) *Window {
 
 	wv := webview.New(s.App.IsDev())
-	wv.SetTitle(s.App.Config.Name)
-	wv.SetSize(s.App.Config.Window.Width, s.App.Config.Window.Height, webview.Hint(s.App.Config.Window.Hint))
+	wv.SetTitle(s.App.Name)
+	wv.SetSize(s.App.Window.Width, s.App.Window.Height, webview.Hint(s.App.Window.Hint))
 	wv.Navigate(s.Addr())
-
-	// todo: add bindings... here
+	wv.Bind("__guark__call", func(fn string, args map[string]interface{}) (interface{}, error) {
+		return s.App.Call(fn, args)
+	})
 
 	return &Window{
 		Webview: wv,
