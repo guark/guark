@@ -3,57 +3,21 @@
 
 package app
 
-import (
-	"io/ioutil"
-
-	"gopkg.in/yaml.v2"
-)
-
-// Config file struct
+// App config.
 type Config struct {
 
-	// Config format version.
-	Guark string `yaml:"guark"`
+	// App assets
+	Assets *Assets
 
-	// App id must be unique!
-	ID string `yaml:"id"`
+	// App functios
+	Funcs Funcs
 
-	// App name.
-	Name string `yaml:"name"`
+	// App hooks.
+	Hooks Hooks
 
-	// App version.
-	Version string `yaml:"version"`
+	// App plugins.
+	Plugins Plugins
 
-	// App license.
-	License string `yaml:"license"`
-
-	// App window state.
-	Window struct {
-		Width  int
-		Height int
-		Hint   int
-	}
-
-	// App log options.
-	Log struct {
-
-		// Log level.
-		Level string
-
-		// Output to.
-		Output string
-	} `yaml:"log"`
-}
-
-// Load config from file.
-func LoadConfig(file string) (c *Config, err error) {
-
-	bytes, err := ioutil.ReadFile(file)
-
-	if err != nil {
-		return
-	}
-
-	err = yaml.Unmarshal(bytes, &c)
-	return
+	// App watchers.
+	Watchers []Watcher
 }
