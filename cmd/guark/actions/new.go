@@ -63,7 +63,7 @@ func New(c *cli.Context) (err error) {
 
 	} else if isCleanDir(dest) == false {
 
-		err = fmt.Errorf("Destination path %s is not empty!", dest)
+		err = fmt.Errorf("Destination path %s is not empty (you can add `--dest new_dir`)!", dest)
 		return
 	}
 
@@ -140,7 +140,7 @@ func refactorMod(mod string, dest string) error {
 			return err
 		}
 
-		return ioutil.WriteFile(path, bytes.ReplaceAll(b, []byte("{{.AppPkg}}"), []byte(mod)), f.Mode())
+		return ioutil.WriteFile(path, bytes.ReplaceAll(b, []byte("{{AppPkg}}"), []byte(mod)), f.Mode())
 	})
 }
 
@@ -174,7 +174,7 @@ func confirmAndRun(s setup, dest string) error {
 	}
 
 	prompt := promptui.Prompt{
-		Label:     "Do you want to run setup commands on your machine",
+		Label:     "Do you want to run setup commands on your machine (Enter for N)",
 		IsConfirm: true,
 		Validate: func(v string) error {
 
