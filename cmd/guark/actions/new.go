@@ -7,9 +7,15 @@ package actions
 import (
 	"io"
 	"os"
+	"os/exec"
 	"fmt"
+	"bytes"
+	"strings"
+	"io/ioutil"
+	"path/filepath"
+	"gopkg.in/yaml.v2"
 	"github.com/urfave/cli/v2"
-
+	"github.com/manifoldco/promptui"
 	"github.com/guark/guark/cmd/guark/stdio"
 )
 
@@ -32,19 +38,29 @@ var (
 	}
 )
 
+// UI setup commands
+type setup struct {
+	Version string `yaml:"guark"`
+	Commands []struct {
+		Cmd string `yaml:"cmd"`
+		Args []string `yaml:"args"`
+	} `yaml:"setup"`
+}
+
 
 func New(c *cli.Context) (err error) {
 
 	var (
 		out = stdio.NewWriter()
 		dest = path(c.String("dest"))
-		content []byte
 		template string
 	)
 
+	defer out.Stop()
+
 	if template = c.String("template"); template == "" {
 
-		err = fmt.Errorf("Template required. for eg: `guark init --template vue`")
+		err = fmt.Errorf("Template required. for eg: `guark new --template vue`")
 		return
 
 	} else if isCleanDir(dest) == false {
@@ -59,18 +75,151 @@ func New(c *cli.Context) (err error) {
 
 	out.Update("Checking remote template")
 
-	// Validate remote repo is a valid guark template.
+	// Validate remote repo.
 	if _, err = GitFile(template, "guark.yaml", os.Getenv("GUARK_GIT_AUTH")); err != nil {
 		return
 	}
 
-	out.Done("Remote template is valid")
+	out.Done("Remote template validated")
+	out.Update(fmt.Sprintf("Downloading: %s", template))
 
-	fmt.Println(content)
-	return nil
+	if err = clone(template, dest); err != nil {
+		return
+	}
 
+	out.Done("Template downloaded successfully.")
+
+	prompt := promptui.Prompt{
+		Label:    "Type your app module name",
+		Default: "github.com/melbahja/myapp",
+		AllowEdit: true,
+		Templates: &promptui.PromptTemplates{
+			Valid:  "⏺ {{ . | cyan }}: ",
+			Success: `{{ green "✔"}} {{ cyan "App module name:" }} `,
+		},
+	}
+
+	mod, err := prompt.Run()
+
+	if err != nil {
+		return
+	}
+
+	err = refactorMod(strings.TrimSpace(mod), dest)
+
+	out.Done("App module name refactored")
+
+	err = setupUI(dest)
+
+	if err == nil {
+		out.Done(fmt.Sprintf("Done! cd to %s and run `guark dev`.", dest))
+	}
+
+	return
 }
 
+
+func clone(repo string, dir string) error {
+	cmd := exec.Command("git", "clone", repo, dir)
+	return cmd.Run()
+}
+
+
+func refactorMod(mod string, dest string) error {
+
+	return filepath.Walk(dest, func (path string, f os.FileInfo, err error) error {
+
+		if err != nil {
+
+			return err
+
+		} else if f.IsDir() || strings.Contains(path, ".git/") {
+
+			return nil
+		}
+
+		b, err := ioutil.ReadFile(path)
+
+		if err != nil {
+			return err
+		}
+
+		return ioutil.WriteFile(path, bytes.ReplaceAll(b, []byte("{{.AppPkg}}"), []byte(mod)), f.Mode())
+	})
+}
+
+
+func setupUI(dir string) error {
+
+	data, err := ioutil.ReadFile(filepath.Join(dir, "ui", "guark-setup.yaml"))
+
+	if err != nil {
+		return err
+	}
+
+	sup := setup{}
+
+	if err = yaml.Unmarshal(data, &sup);  err != nil {
+		return err
+	}
+
+	if len(sup.Commands) > 0 {
+		err = confirmAndRun(sup, dir)
+	}
+
+	return err
+}
+
+func confirmAndRun(s setup, dest string) error {
+
+	fmt.Println("⏺ UI setup commands (Verify them before confirm):")
+
+	for _, v := range s.Commands {
+		fmt.Println(fmt.Sprintf("  - %s %s", v.Cmd, strings.Join(v.Args, " ")))
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Do you want to run setup commands on your machine",
+		IsConfirm: true,
+		Validate: func (v string) error {
+
+			if v == "y" {
+				return fmt.Errorf("Are you sure? type uppercase Y.")
+			}
+
+			return nil
+		},
+		Templates: &promptui.PromptTemplates{
+			Success: `{{ green "✔"}} {{ cyan "You allowed setup commands:" }} `,
+		},
+	}
+
+	yes, err := prompt.Run()
+
+	if err != nil {
+
+		return err
+
+	} else if yes == "Y" {
+
+		for _, v := range s.Commands {
+			if err = runSetupCommand(dest, v.Cmd, v.Args); err != nil {
+				break
+			}
+		}
+	}
+
+	return err
+}
+
+
+func runSetupCommand(dir string, c string, args []string) error {
+	cmd := exec.Command(c, args...)
+	cmd.Dir = filepath.Join(dir, "ui")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
 
 func isCleanDir(dir string) bool {
 
