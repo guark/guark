@@ -12,12 +12,19 @@ import (
 )
 
 // TODO: add build flags for linux, and windows.
-func getBuildFlagsAndEnvFor(target string, buildDir string) (flags []string, env []string) {
+func getBuildFlagsAndEnvFor(target string, buildDir string, id string) (flags []string, env []string, out string) {
 
 	switch target {
-	case "darwin":
+	case "darwin",
+		"linux":
+		out = fmt.Sprintf("%s/%s", buildDir, id)
 		env = []string{fmt.Sprintf("GOOS=%s", target), "CGO_ENABLED=1"}
-		flags = []string{"build", "-o", fmt.Sprintf("%s/app", buildDir)}
+		flags = []string{"build"}
+		return
+	case "windows":
+		out = fmt.Sprintf("%s/%s.exe", buildDir, id)
+		env = []string{fmt.Sprintf("GOOS=%s", target), "CGO_ENABLED=1"}
+		flags = []string{"build", "-ldflags", "-H windowsgui"}
 		return
 	}
 

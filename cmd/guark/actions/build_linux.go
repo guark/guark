@@ -11,19 +11,21 @@ import (
 	"fmt"
 )
 
-// // https://blog.svgames.pl/article/cross-compiling-c-programs-for-ms-windows-using-mingw
 // TODO: add darwin cross compile build flags.
-func getBuildFlagsAndEnvFor(target string, buildDir string) (flags []string, env []string) {
+func getBuildFlagsAndEnvFor(target string, buildDir string, id string) (flags []string, env []string, out string) {
 
 	switch target {
 	case "windows":
+		out = fmt.Sprintf("%s/%s.exe", buildDir, id)
 		env = []string{fmt.Sprintf("GOOS=%s", target), "CGO_ENABLED=1", "CC=x86_64-w64-mingw32-gcc", "CXX=x86_64-w64-mingw32-g++"}
-		flags = []string{"build", "-ldflags", "-H windowsgui", "-o", fmt.Sprintf("%s/app.exe", buildDir)}
+		flags = []string{"build", "-ldflags", "-H windowsgui"}
 		return
 
-	case "linux":
+	case "linux",
+		"darwin":
+		out = fmt.Sprintf("%s/%s", buildDir, id)
 		env = []string{fmt.Sprintf("GOOS=%s", target), "CGO_ENABLED=1"}
-		flags = []string{"build", "-o", fmt.Sprintf("%s/app", buildDir)}
+		flags = []string{"build"}
 		return
 	}
 
