@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"net/http"
 
 	"github.com/guark/guark/app"
 	"github.com/sirupsen/logrus"
@@ -15,7 +16,6 @@ import (
 type Server struct {
 	App *app.App
 	Log *logrus.Entry
-	// Port   string
 	Root   string
 	ln     net.Listener
 	ran    bool
@@ -31,7 +31,7 @@ func (s *Server) Start() {
 	s.ran = true
 
 	if s.App.IsDev() == false {
-		go serve(s)
+		s.serve()
 	}
 
 	s.Log.Debug("Starting new window.")
@@ -43,7 +43,7 @@ func (s *Server) Start() {
 func (s Server) Addr() string {
 
 	if s.ln != nil {
-		return s.ln.Addr().String()
+		return fmt.Sprintf("http://%s", s.ln.Addr().String())
 	}
 
 	return fmt.Sprintf("http://127.0.0.1:%s", os.Getenv("GUARK_DEBUG_PORT"))
@@ -56,8 +56,42 @@ func (s *Server) Stop() {
 	if s.App.IsDev() {
 		return
 	}
+
+	s.ln.Close()
 }
 
-func serve(s *Server) {
-	// todo..
+func (s *Server) serve() {
+
+	var err error
+
+	s.ln, err = net.Listen("tcp", "127.0.0.1:0")
+
+	if err != nil {
+		panic(err)
+	}
+
+	go http.Serve(s.ln, &srvHandler{assets: s.App.Assets})
+}
+
+
+type srvHandler struct {
+	assets *app.Assets
+}
+
+
+func (h srvHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	if r.URL.Path == "/" {
+		r.URL.Path = "/index.html"
+	}
+
+	f, e := h.assets.ReadAll(r.URL.Path)
+
+	if e != nil {
+		w.Write([]byte(e.Error()))
+		return
+	}
+
+	w.Write(f)
+	w.Write([]byte("hello"))
 }
