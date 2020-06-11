@@ -3,12 +3,11 @@ package guark
 import (
 	"io/ioutil"
 
-	"github.com/guark/guark/app"
 	"gopkg.in/yaml.v2"
 )
 
 // Unmarshal guark.yaml file.
-func UnmarshalGuarkFile(file string, app *app.App) (err error) {
+func UnmarshalGuarkFile(file string, s interface{}) (err error) {
 
 	bytes, err := ioutil.ReadFile(file)
 
@@ -16,6 +15,6 @@ func UnmarshalGuarkFile(file string, app *app.App) (err error) {
 		return
 	}
 
-	err = yaml.Unmarshal(bytes, app)
+	err = yaml.Unmarshal(bytes, s)
 	return
 }

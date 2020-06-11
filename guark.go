@@ -5,9 +5,11 @@ package guark
 
 import (
 	"fmt"
+
 	"github.com/guark/guark/app"
 	"github.com/guark/guark/internal/window"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 type Guark struct {
@@ -18,35 +20,6 @@ type Guark struct {
 }
 
 func (g *Guark) Run() (err error) {
-
-	var logLevel logrus.Level
-
-	if g.App.IsDev() {
-
-		err = UnmarshalGuarkFile("guark.yaml", g.App)
-
-		if err != nil {
-			g.log.Error(err)
-			return
-		}
-
-		logLevel = logrus.DebugLevel
-		logrus.SetFormatter(&logrus.TextFormatter{
-			ForceColors: true,
-		})
-
-	} else {
-
-		logLevel = logrus.WarnLevel
-	}
-
-	logrus.SetLevel(logLevel)
-
-	g.log.Debug("config loaded.")
-
-	g.srv.App = g.App
-	g.srv.Root = g.App.Path("static")
-	g.srv.Log = g.log
 
 	g.log.Debug("starting guark server.")
 	g.srv.Start()
@@ -65,7 +38,7 @@ func (g *Guark) Exit() {
 
 func New(c *app.Config) *Guark {
 
-	return &Guark{
+	g := &Guark{
 		App: app.New(c, app.Funcs{
 			"hook": func(c app.Context) (interface{}, error) {
 
@@ -77,6 +50,70 @@ func New(c *app.Config) *Guark {
 			},
 		}),
 		log: logrus.WithFields(logrus.Fields{"context": "guark"}),
-		srv: &window.Server{},
 	}
+
+	// Load guark yaml file.
+	bs, err := g.App.Embed.Data("guark.yaml")
+
+	if err != nil {
+		g.log.Panic(err)
+	}
+
+	err = yaml.Unmarshal(*bs, g.App)
+
+	if err != nil {
+		g.log.Panic(err)
+	}
+
+	if g.App.Assets != nil {
+		g.App.Assets.Prefix = g.App.Path("assets")
+	}
+
+	if g.App.IsDev() {
+
+		logrus.SetLevel(logrus.DebugLevel)
+		logrus.SetFormatter(&logrus.TextFormatter{
+			ForceColors: true,
+		})
+
+	} else {
+
+		logrus.SetLevel(logLevel(g.App.LogLevel))
+	}
+
+	g.srv = &window.Server{
+		App:  g.App,
+		Root: g.App.Path("static"),
+		Log:  g.log,
+	}
+
+	g.log.Debug("config loaded.")
+
+	return g
+}
+
+
+func logLevel(n string) logrus.Level {
+
+	switch n {
+	case "debug":
+		return logrus.DebugLevel
+
+	case "info":
+		return logrus.InfoLevel
+
+	case "warn":
+		return logrus.WarnLevel
+
+	case "error":
+		return logrus.ErrorLevel
+
+	case "fatal":
+		return logrus.FatalLevel
+
+	case "panic":
+		return logrus.PanicLevel
+	}
+
+	return logrus.ErrorLevel
 }
