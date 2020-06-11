@@ -45,7 +45,6 @@ func (p Params) Has(key string) bool {
 	return ok
 }
 
-
 func NewContext(a *App, params map[string]interface{}) Context {
 	return Context{
 		App: a,

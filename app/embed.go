@@ -11,13 +11,13 @@ import (
 type Embed struct {
 
 	// List of embeds
-	Embeds map[string]*[]byte
+	Files map[string]*[]byte
 }
 
 // Get embeded data, it returns *[]byte and error
 func (e Embed) Data(name string) (b *[]byte, err error) {
 
-	b, ok := e.Embeds[name]
+	b, ok := e.Files[name]
 
 	if ok == false {
 		err = fmt.Errorf("could not find: %s", name)
@@ -29,5 +29,5 @@ func (e Embed) Data(name string) (b *[]byte, err error) {
 // Delete from embeds
 func (e *Embed) Delete(name string) {
 
-	delete(e.Embeds, name)
+	delete(e.Files, name)
 }

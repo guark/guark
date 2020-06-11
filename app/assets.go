@@ -6,6 +6,7 @@ package app
 import (
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 )
 
 // Assets struct
@@ -22,7 +23,7 @@ type Assets struct {
 func (a Assets) ReadAll(file string) ([]byte, error) {
 
 	if v, ok := a.Index[file]; ok {
-		return ioutil.ReadFile(a.Prefix + v)
+		return ioutil.ReadFile(filepath.Join(a.Prefix, v))
 	}
 
 	return nil, fmt.Errorf("could not find: %s", file)

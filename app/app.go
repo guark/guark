@@ -4,10 +4,11 @@
 package app
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
+
 	"github.com/guark/guark/app/platform"
 	"github.com/sirupsen/logrus"
 )
@@ -49,6 +50,9 @@ type App struct {
 	// App assets
 	Assets *Assets
 
+	// App embeds
+	Embed *Embed
+
 	// App functios
 	Funcs Funcs
 
@@ -84,7 +88,7 @@ func (a App) Path(elem ...string) string {
 		return filepath.Join(append([]string{cwd, "res"}, elem...)...)
 	}
 
-	return filepath.Join(append([]string{platform.DATA_DIR, a.ID}, elem...)...)
+	return filepath.Join(append([]string{platform.DATA_DIR, a.ID, "datadir"}, elem...)...)
 }
 
 // Call a func.
@@ -121,21 +125,15 @@ func (a *App) Call(fn string, args map[string]interface{}) (interface{}, error) 
 	return nil, fmt.Errorf("Invalid func call: %s", fn)
 }
 
-
 func New(c *Config, builtin Funcs) *App {
-	app := &App{
+	return &App{
 		Log:      logrus.WithFields(logrus.Fields{"context": "app"}),
 		Funcs:    c.Funcs,
 		Hooks:    c.Hooks,
+		Embed:    c.Embed,
 		Assets:   c.Assets,
 		Plugins:  c.Plugins,
 		Watchers: c.Watchers,
-		bFuncs: builtin,
+		bFuncs:   builtin,
 	}
-
-	if app.Assets != nil {
-		app.Assets.Prefix = app.Path("assets")
-	}
-
-	return app
 }
