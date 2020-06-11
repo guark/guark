@@ -20,4 +20,6 @@ type Config struct {
 
 	// App watchers.
 	Watchers []Watcher
+
+	Embed *Embed
 }

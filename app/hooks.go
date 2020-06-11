@@ -1,7 +1,5 @@
 package app
 
-
-
 import "fmt"
 
 type (
