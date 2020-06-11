@@ -9,15 +9,23 @@ package actions
 
 import (
 	"fmt"
+	"path/filepath"
 )
 
 // TODO: add linux and darwin cross compile flags.
-func getBuildFlagsAndEnvFor(target string, buildDir string) (flags []string, env []string) {
+func getBuildFlagsAndEnvFor(target string, buildDir string, id string) (flags []string, env []string, out string) {
 
 	switch target {
 	case "windows":
+		out = filepath.Join(buildDir, fmt.Sprintf("%s.exe", id))
 		env = []string{fmt.Sprintf("GOOS=%s", target), "CGO_ENABLED=1"}
-		flags = []string{"build", "-o", fmt.Sprintf("%s/app", buildDir)}
+		flags = []string{"build", "-ldflags", "-H windowsgui"}
+		return
+	case "linux",
+		"darwin":
+		out = filepath.Join(buildDir, id)
+		env = []string{fmt.Sprintf("GOOS=%s", target), "CGO_ENABLED=1"}
+		flags = []string{"build"}
 		return
 	}
 

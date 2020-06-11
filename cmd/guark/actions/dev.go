@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/guark/guark"
 	"github.com/guark/guark/app/utils"
 	"github.com/guark/guark/cmd/guark/stdio"
 	"github.com/urfave/cli/v2"
@@ -30,6 +31,8 @@ var (
 func Dev(c *cli.Context) error {
 
 	var (
+		err      error
+		b        = build{}
 		sig      = make(chan os.Signal)
 		out      = stdio.NewWriter()
 		lock     = path("ui", "guark.lock")
@@ -40,6 +43,14 @@ func Dev(c *cli.Context) error {
 			cancel()
 		}
 	)
+
+	if err = guark.UnmarshalGuarkFile("guark.yaml", &b); err != nil {
+		return err
+	}
+
+	if err = b.embed([]string{"guark.yaml"}, ""); err != nil {
+		return err
+	}
 
 	port, err := utils.GetNewPort()
 
