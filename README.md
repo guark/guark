@@ -5,14 +5,14 @@ Guark allows you to build beautiful user interfaces using modern web technologie
 
 ## Cross Compiling Status.
 
-|  ⬇️ Platform ⼁ Build Target ➡️ |  Build to linux | Build to Windows  | Build to MacOS  |
+|   Platform  ⬇️  ⼁ Build Target ➡️ |  Build to linux | Build to Windows  | Build to MacOS  |
 |---|---|---|---|
 | Linux    |  ✔  | [1] ✔ |  ⚠  |
 | MacOS    |  ⚠  |   ⚠   |  ✔  |
 | Windows  |  ⚠  |   ✔   |  ⚠  |
 
-- ⚠: Work In Progress.
-- ✔: Supported.
+- Work In Progress. ⚠
+- Supported. ✔
 - [1]: `mingw64-gcc` Required.
 
 
