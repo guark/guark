@@ -4,24 +4,24 @@
 package window
 
 import (
-	"fmt"
-	"net"
-	"os"
-	"io"
 	"bytes"
-	"mime"
-	"strings"
-	"net/http"
-	"path/filepath"
 	"compress/gzip"
+	"fmt"
+	"io"
+	"mime"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/guark/guark/app"
 	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
-	App *app.App
-	Log *logrus.Entry
+	App    *app.App
+	Log    *logrus.Entry
 	Root   string
 	ln     net.Listener
 	ran    bool
@@ -79,12 +79,10 @@ func (s *Server) serve() {
 	go http.Serve(s.ln, &srvHandler{assets: s.App.Assets, log: s.Log})
 }
 
-
 type srvHandler struct {
 	assets *app.Assets
-	log *logrus.Entry
+	log    *logrus.Entry
 }
-
 
 func (h srvHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
