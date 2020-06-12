@@ -7,7 +7,13 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"io"
+	"bytes"
+	"mime"
+	"strings"
 	"net/http"
+	"path/filepath"
+	"compress/gzip"
 
 	"github.com/guark/guark/app"
 	"github.com/sirupsen/logrus"
@@ -70,12 +76,13 @@ func (s *Server) serve() {
 		panic(err)
 	}
 
-	go http.Serve(s.ln, &srvHandler{assets: s.App.Assets})
+	go http.Serve(s.ln, &srvHandler{assets: s.App.Assets, log: s.Log})
 }
 
 
 type srvHandler struct {
 	assets *app.Assets
+	log *logrus.Entry
 }
 
 
@@ -85,13 +92,32 @@ func (h srvHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = "/index.html"
 	}
 
-	f, e := h.assets.ReadAll(r.URL.Path)
+	if ctype := mime.TypeByExtension(filepath.Ext(r.URL.Path)); ctype != "" {
+		w.Header().Set("Content-Type", ctype)
+	}
+
+	gz, e := h.assets.ReadAll(r.URL.Path)
 
 	if e != nil {
 		w.Write([]byte(e.Error()))
 		return
 	}
 
-	w.Write(f)
-	w.Write([]byte("hello"))
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Write(gz)
+		return
+	}
+
+	reader, e := gzip.NewReader(bytes.NewReader(gz))
+
+	if e != nil {
+		w.Write([]byte(e.Error()))
+		return
+	}
+
+	if _, err := io.Copy(w, reader); err != nil {
+		h.log.Error(err)
+	}
 }
