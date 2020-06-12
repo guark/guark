@@ -6,13 +6,13 @@ package actions
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
-	"text/template"
 	"reflect"
 	"strings"
+	"text/template"
 
 	"github.com/guark/guark"
 	"github.com/guark/guark/app/utils"
@@ -51,12 +51,12 @@ var (
 
 type build struct {
 	GuarkFileVersion string `yaml:"guark"`
-	Version   string `yaml:"version"`
-	ID        string `yaml:"id"`
-	Name string `yaml:"name"`
-	License string `yaml:"license"`
-	LogLevel  string `yaml:"logLevel"`
-	LogOutput string `yaml:"logOutput"`
+	Version          string `yaml:"version"`
+	ID               string `yaml:"id"`
+	Name             string `yaml:"name"`
+	License          string `yaml:"license"`
+	LogLevel         string `yaml:"logLevel"`
+	LogOutput        string `yaml:"logOutput"`
 }
 
 func Build(c *cli.Context) (err error) {
@@ -175,7 +175,6 @@ func deleteDest(dest string) error {
 	return nil
 }
 
-
 func (b build) target(goos string, dir string) error {
 
 	buildDir, err := getBuildDir(goos, dir)
@@ -209,7 +208,6 @@ func (b build) ui(pkg string, dir string) ([]byte, error) {
 
 func (b build) assets(dir string) error {
 
-
 	staticDir := filepath.Join(dir, "assets")
 
 	if err := os.Mkdir(staticDir, 0754); err != nil {
@@ -224,12 +222,11 @@ func (b build) embed(files []string, dir string) error {
 	return generator.Embed(files, path("lib", "embed.go"), "lib", filepath.Join(dir, "ui"))
 }
 
-
 func (b build) bundle(osbuild string, src string, dest string) error {
 
 	switch osbuild {
 	case "linux":
-		return b.bundleLinux(src, dest);
+		return b.bundleLinux(src, dest)
 	}
 
 	return nil
@@ -270,9 +267,9 @@ func (b build) meta(osbuild string, dest string) error {
 		}
 
 		return tmpl.Execute(f, map[string]string{
-			"ID": b.ID,
+			"ID":      b.ID,
 			"Version": b.Version,
-			"Name": b.Name,
+			"Name":    b.Name,
 			"License": b.License,
 		})
 	})
@@ -290,7 +287,6 @@ func (b build) bundleLinux(src string, dest string) error {
 
 	return nil
 }
-
 
 func getDlls() string {
 	return filepath.Join(os.Getenv("GOPATH"), "src", pkgPath(webview.New(true)), "dll")
@@ -337,4 +333,3 @@ func must(err error) {
 		log.Fatal(err)
 	}
 }
-
