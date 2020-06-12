@@ -92,7 +92,6 @@ func New(c *app.Config) *Guark {
 	return g
 }
 
-
 func logLevel(n string) logrus.Level {
 
 	switch n {

@@ -6,11 +6,13 @@ package actions
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strings"
+	"text/template"
 
 	"github.com/guark/guark"
 	"github.com/guark/guark/app/utils"
@@ -47,6 +49,15 @@ var (
 	}
 )
 
+type build struct {
+	GuarkFileVersion string `yaml:"guark"`
+	Version          string `yaml:"version"`
+	ID               string `yaml:"id"`
+	Name             string `yaml:"name"`
+	License          string `yaml:"license"`
+	LogLevel         string `yaml:"logLevel"`
+	LogOutput        string `yaml:"logOutput"`
+}
 
 func Build(c *cli.Context) (err error) {
 
@@ -95,7 +106,7 @@ func Build(c *cli.Context) (err error) {
 	}
 
 	// Clear tmp.
-	// defer os.RemoveAll(tmp)
+	defer os.RemoveAll(tmp)
 
 	out.Update("Building app ui.")
 
@@ -130,17 +141,12 @@ func Build(c *cli.Context) (err error) {
 			return
 		}
 
+		b.meta(targets[i], c.String("dest"))
+
 		out.Done(fmt.Sprintf("Guark build for %s 🙊", targets[i]))
 	}
 
-	// if c.String("dest") == "" {
-	// 	// move things.
-	// }
-
-	// out.Done("Guark build finished 🚀🚀")
-
-	// time.Sleep(100000 * time.Second)
-
+	out.Done("Guark build finished 🚀🚀")
 	return
 }
 
@@ -167,14 +173,6 @@ func deleteDest(dest string) error {
 	}
 
 	return nil
-}
-
-
-type build struct {
-	Version   string `yaml:"guark"`
-	ID        string `yaml:"id"`
-	LogLevel  string `yaml:"logLevel"`
-	LogOutput string `yaml:"logOutput"`
 }
 
 func (b build) target(goos string, dir string) error {
@@ -210,7 +208,6 @@ func (b build) ui(pkg string, dir string) ([]byte, error) {
 
 func (b build) assets(dir string) error {
 
-
 	staticDir := filepath.Join(dir, "assets")
 
 	if err := os.Mkdir(staticDir, 0754); err != nil {
@@ -225,44 +222,68 @@ func (b build) embed(files []string, dir string) error {
 	return generator.Embed(files, path("lib", "embed.go"), "lib", filepath.Join(dir, "ui"))
 }
 
-
 func (b build) bundle(osbuild string, src string, dest string) error {
 
 	switch osbuild {
 	case "linux":
-		return b.bundleLinux(src, dest);
+		return b.bundleLinux(src, dest)
 	}
 
 	return nil
 }
 
+// Parse meta files. then move them in dest dir. and replace _id_ in path with App id.
+func (b build) meta(osbuild string, dest string) error {
+
+	metaFilesDir := filepath.Join(wdir, "res", "meta", osbuild)
+	metaFilesDest := filepath.Join(dest, osbuild)
+
+	return filepath.Walk(metaFilesDir, func(path string, info os.FileInfo, err error) error {
+
+		if info.IsDir() {
+			return nil
+		}
+
+		metaFile := filepath.Join(metaFilesDest, strings.Replace(filepath.Base(path), "_id_", b.ID, -1))
+
+		f, err := os.Create(metaFile)
+
+		if err != nil {
+			return err
+		}
+
+		defer f.Close()
+
+		fc, err := ioutil.ReadFile(path)
+
+		if err != nil {
+			return err
+		}
+
+		tmpl, err := template.New("guark.embed").Parse(string(fc))
+
+		if err != nil {
+			return err
+		}
+
+		return tmpl.Execute(f, map[string]string{
+			"ID":      b.ID,
+			"Version": b.Version,
+			"Name":    b.Name,
+			"License": b.License,
+		})
+	})
+}
+
+// Move linux compiled files from temp to dest.
 func (b build) bundleLinux(src string, dest string) error {
 
 	prefix := filepath.Join(dest, "linux")
 	assets := filepath.Join(prefix, "datadir", "assets")
 	must(os.MkdirAll(assets, 0740))
 	must(copy.Copy(filepath.Join(src, "assets"), assets))
-	must(copy.Copy(filepath.Join(src, "linux", b.ID), filepath.Join(prefix, "bin", b.ID)))
 	must(copy.Copy(filepath.Join(wdir, "res", "icons"), filepath.Join(prefix, "datadir", "icons")))
-
-	make, err := os.Create(filepath.Join(prefix, "Makefile"))
-
-	if err != nil {
-		return err
-	}
-
-	make.WriteString(fmt.Sprintf(`
-# to install the app run: sudo make install
-install:
-	install -C bin/%[1]s /usr/bin/%[1]s
-	mkdir -p /usr/share/%[1]s
-	cp -r datadir/ /usr/share/%[1]s
-	find /usr/share/%[1]s/ -type d -exec chmod 755 {} \;
-	find /usr/share/%[1]s/ -type f -exec chmod 644 {} \;
-
-`, b.ID))
-
-	// TODO: parse .desktop file.
+	must(copy.Copy(filepath.Join(src, "linux", b.ID), filepath.Join(prefix, "bin", b.ID)))
 
 	return nil
 }
@@ -307,11 +328,8 @@ func checkTarget(target string) error {
 	return fmt.Errorf("target: %s not supported yet!", target)
 }
 
-
-
 func must(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
 }
-
