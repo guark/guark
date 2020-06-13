@@ -41,9 +41,6 @@ type App struct {
 	// App log level.
 	LogLevel string `yaml:"logLevel"`
 
-	// Output logs to?
-	LogOutput string `yaml:"logOutput"`
-
 	// App log.
 	Log *logrus.Entry
 
