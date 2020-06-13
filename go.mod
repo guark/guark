@@ -7,11 +7,13 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/google/uuid v1.1.1
+	github.com/jackmordaunt/icns v1.0.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
 	github.com/manifoldco/promptui v0.7.0
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/otiai10/copy v1.2.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.6.0

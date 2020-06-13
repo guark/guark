@@ -5,6 +5,7 @@ package actions
 
 import (
 	"fmt"
+	"image"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"github.com/guark/guark/app/utils"
 	"github.com/guark/guark/cmd/guark/stdio"
 	"github.com/guark/guark/internal/generator"
+	"github.com/jackmordaunt/icns"
 	"github.com/manifoldco/promptui"
 	"github.com/otiai10/copy"
 	"github.com/urfave/cli/v2"
@@ -141,6 +143,7 @@ func Build(c *cli.Context) (err error) {
 			return
 		}
 
+		// Build meta files.
 		b.meta(targets[i], c.String("dest"))
 
 		out.Done(fmt.Sprintf("Guark build for %s 🙊", targets[i]))
@@ -226,10 +229,15 @@ func (b build) bundle(osbuild string, src string, dest string) error {
 
 	switch osbuild {
 	case "linux":
+		return b.bundleMacos(src, dest)
 		return b.bundleLinux(src, dest)
+	case "windows":
+		return b.bundleWindows(src, dest)
+	case "darwin":
+		return b.bundleMacos(src, dest)
 	}
 
-	return nil
+	return fmt.Errorf("could not bundle for: %s", osbuild)
 }
 
 // Parse meta files. then move them in dest dir. and replace _id_ in path with App id.
@@ -237,6 +245,10 @@ func (b build) meta(osbuild string, dest string) error {
 
 	metaFilesDir := filepath.Join(wdir, "res", "meta", osbuild)
 	metaFilesDest := filepath.Join(dest, osbuild)
+
+	if osbuild == "darwin" {
+		metaFilesDest = filepath.Join(metaFilesDest, "Contents")
+	}
 
 	return filepath.Walk(metaFilesDir, func(path string, info os.FileInfo, err error) error {
 
@@ -275,7 +287,7 @@ func (b build) meta(osbuild string, dest string) error {
 	})
 }
 
-// Move linux compiled files from temp to dest.
+// Bundle linux app.
 func (b build) bundleLinux(src string, dest string) error {
 
 	prefix := filepath.Join(dest, "linux")
@@ -288,8 +300,61 @@ func (b build) bundleLinux(src string, dest string) error {
 	return nil
 }
 
+// Bundle macos app.
+// TODO: zip the app.
+func (b build) bundleMacos(src string, dest string) error {
+
+	prefix := filepath.Join(dest, "darwin", "Contents")
+	assets := filepath.Join(prefix, "Resources", "assets")
+	must(os.MkdirAll(assets, 0740))
+	must(copy.Copy(filepath.Join(src, "assets"), assets))
+	must(copy.Copy(filepath.Join(src, "darwin", b.ID), filepath.Join(prefix, "MacOS", b.ID)))
+
+	// Convert icon png to mac icns format
+	pngf, err := os.Open(filepath.Join(wdir, "res", "icons", "icon.png"))
+
+	if err != nil {
+		return err
+	}
+
+	defer pngf.Close()
+
+	srcImg, _, err := image.Decode(pngf)
+
+	if err != nil {
+		return err
+	}
+
+	icon, err := os.Create(filepath.Join(prefix, "Resources", fmt.Sprintf("%s.icns", b.ID)))
+
+	if err != nil {
+		return err
+	}
+
+	defer icon.Close()
+
+	return icns.Encode(icon, srcImg)
+}
+
+// Bundle windows app.
+// TODO: build a msi file.
+// TODO: Don't repeat yourself
+func (b build) bundleWindows(src string, dest string) error {
+
+	prefix := filepath.Join(dest, "windows")
+	assets := filepath.Join(prefix, "datadir", "assets")
+	must(os.MkdirAll(assets, 0740))
+	must(copy.Copy(filepath.Join(src, "assets"), assets))
+	must(copy.Copy(filepath.Join(wdir, "res", "icons"), filepath.Join(prefix, "datadir", "icons")))
+	must(copy.Copy(filepath.Join(src, "windows", fmt.Sprintf("%s.exe", b.ID)), filepath.Join(prefix, fmt.Sprintf("%s.exe", b.ID))))
+	must(copy.Copy(getDlls(), prefix))
+
+	return nil
+}
+
+// TODO: change value of "x64" to be based on build
 func getDlls() string {
-	return filepath.Join(os.Getenv("GOPATH"), "src", pkgPath(webview.New(true)), "dll")
+	return filepath.Join(os.Getenv("GOPATH"), "src", pkgPath(webview.New(true)), "dll", "x64")
 }
 
 // this function code was stolen from:
