@@ -89,6 +89,15 @@ func New(c *app.Config) *Guark {
 
 	g.log.Debug("config loaded.")
 
+	g.log.Debug("Initialize plugins.")
+
+	// Initialize plugins
+	for _, p := range g.App.Plugins {
+		p.Init(*g.App)
+	}
+
+	g.log.Debug("Plugins Initialized.")
+
 	return g
 }
 
