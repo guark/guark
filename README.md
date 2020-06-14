@@ -6,7 +6,7 @@
     <p>Guark allows you to build beautiful user interfaces using modern web technologies such as Vue.js, React.js..., while your app logic handled and powered by the amazing <b>Go</b>.</p>
 </div>
 
-[![Apker](https://github.com/unleashable/apker/raw/master/.github/images/demo.png)](https://asciinema.org/a/TGa2tfGhFfVmtriuE51xwqFYM)
+[![Guark Framework7 Demo App](https://github.com/guark/guark/raw/master/testdata/demo.png)](https://asciinema.org/a/TGa2tfGhFfVmtriuE51xwqFYM)
 
 <p align="center">
     <a href="#installation">Installation</a> ❘
