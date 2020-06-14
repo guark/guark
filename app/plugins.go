@@ -3,6 +3,7 @@ package app
 type (
 	// Guark plugin interface.
 	Plugin interface {
+		Init(App)
 
 		// Get plugin name.
 		GetName() string
