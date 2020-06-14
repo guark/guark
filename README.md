@@ -28,7 +28,7 @@ Go + Quark = Guark
 
 Simplify cross platform desktop apps development.
 
-### 🎸   Who it works
+### 🎸   How it works
 
 Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (vue, react, etc...), and guark javascript API allows you to call your exported go functions and plugins.
 
