@@ -30,9 +30,9 @@ Simplify cross platform desktop apps development.
 
 ### 🎸   How it works
 
-Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (vue, react, etc...), and guark javascript API allows you to call your exported go functions and plugins.
+Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (Vue.js, React.js, etc...), while Guark javascript API allows you to communicate between your Go and UI JS framework, and calling your exported Go functions and plugin(s) methods.
 
-### 📐   Important note
+### 🙏   Important note
 
 This is a v0 "WIP" prototype of guark, still a lot to do to make it to production v1. your feedback is very appreciated.
 
@@ -58,7 +58,7 @@ Install guark cli tool.
 go install github.com/guark/guark/cmd/guark
 ```
 
-If you on Linux❤ you need to install `webkit2gtk3`:
+If you on Linux ❤   you need to install `webkit2gtk3`:
 ```bash
 // fedora
 sudo dnf install webkit2gtk3-devel
