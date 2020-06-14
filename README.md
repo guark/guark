@@ -20,21 +20,21 @@
 
 Guark is an open-source framework to build cross platform desktop GUI applications.
 
-### 📢   What Guark Stands For?
+### 📢   What Guark stands for?
 
 Go + Quark = Guark
 
-### 🔮   Guark Mission
+### 🔮   Guark mission
 
 Simplify cross platform desktop apps development.
 
-### 🎸   Who It Works
+### 🎸   Who it works
 
 Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (vue, react, etc...), and guark javascript API allows you to call your exported go functions and plugins.
 
-### 📐   Important Note
+### 📐   Important note
 
-This is a v0 "working" prototype of guark, still a lot to do to make it to v1 production ready. your feedback is very appreciated.
+This is a v0 "WIP" prototype of guark, still a lot to do to make it to production v1. your feedback is very appreciated.
 
 ## 💌  Features
 
@@ -44,6 +44,11 @@ This is a v0 "working" prototype of guark, still a lot to do to make it to v1 pr
 - You can use any front end framework
 - Using native system webview (unlike electron we do not embed chrome in the builds)
 - Cross Compile (WIP)
+- App Hooks
+- App Watchers
+- App Plugins (You can make your own)
+- Simple
+- And more..
 
 
 ## 📜   Installation
