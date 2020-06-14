@@ -16,18 +16,34 @@
 </p>
 
 
-## 🛈 About The Project
+## 🖳 About The Project
 
 Guark is an open-source framework to build cross platform desktop GUI applications.
 
 ### 📢   What Guark Stands For?
+
 Go + Quark = Guark
 
 ### 🔮   Guark Mission
+
 Simplify cross platform desktop apps development.
 
 ### 🎸   Who It Works
+
 Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (vue, react, etc...), and guark javascript API allows you to call your exported go functions and plugins.
+
+### 📐   Important Note
+
+This is a v0 "working" prototype of guark, still a lot to do to make it to v1 production ready. your feedback is very appreciated.
+
+## 💌  Features
+
+- Desktop applications with GO ♥
+- One codebase for: Linux, MacOS, and Windows
+- Hot Reload UI (and auto restart app on Go code change coming soon)
+- You can use any front end framework
+- Using native system webview (unlike electron we do not embed chrome in the builds)
+- Cross Compile (WIP)
 
 
 ## 📜   Installation
@@ -51,6 +67,7 @@ sudo apt install libwebkit2gtk-4.0-dev
 After installing guark CLI tool, the next step is to create a new guark project based on template that you like:
 
 ### Create new project
+
 ```bash
 guark new --template vue --dest myapp
 ``` 
@@ -59,10 +76,50 @@ React and more templates coming soon...
 
 
 ### Start dev server
+
 After creating new project change your working directory to it and run: `guark dev`
 
 ### Build your app
-You can build your app with `guark build`.  
+
+You can build your app with `guark build`. 
+
+### Export your first GO function to JS API
+
+You need to create a file for your function in `lib/funcs` directory.
+```go
+// lib/funcs/foo_bar.go
+
+import (
+	"github.com/guark/guark/app"
+)
+
+func FooBar(c app.Context) (interface{}, error) {
+   c.App.Log.Debug("Foo bar called") 
+   return "This is a my return value to javasript", nil
+}
+```
+
+Then export it to Guark JS API in `lib/config.go` file.
+```go
+import "github.com/your_username/your_app/lib/funcs"
+
+// Exposed functions to guark Javascript api.
+var Funcs = app.Funcs{
+	"foo": funcs.FooBar,
+}
+
+```
+
+Then you can call your function in javascript:
+```js
+import g from "guark"
+
+g.call("foo")
+ .then(res => console.log(res))
+ .catch(err => console.error(err))
+```
+
+See Vue template as an example: https://github.com/guark/vue
 
 
 ## Cross Compiling Status.
@@ -89,13 +146,14 @@ sudo apt install binutils-mingw-w64
 
 You can use any cross compiler for example: `env CC=.. CXX=.. guark build --target darwin`.
 
-## TODOs Before v1:
+## V1 Roadmap:
 
+- [ ] Add App Watchers.
+- [ ] Add More Templates (React.js, Framework7, and more..)
 - [ ] Add More Tests.
 - [ ] Test Guark Apps on MacOS and Windows.
 - [ ] Auto Reload App When Go Code Changes.
 - [ ] Guark App Installer (Cross Platform).
-- [ ] Add More Templates (React.js, Framework7, and more..)
-- [ ] Strip Builds
+- [ ] Strip Binaries on build
 
 
