@@ -229,7 +229,6 @@ func (b build) bundle(osbuild string, src string, dest string) error {
 
 	switch osbuild {
 	case "linux":
-		return b.bundleMacos(src, dest)
 		return b.bundleLinux(src, dest)
 	case "windows":
 		return b.bundleWindows(src, dest)
