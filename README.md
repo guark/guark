@@ -53,18 +53,16 @@ After installing guark CLI tool, the next step is to create a new guark project 
 ### Create new project
 ```bash
 guark new --template vue --dest myapp
-
-// React template coming soon...
-// guark new --template react --dest myreactapp
-// You can create new project from git url:
-// guark new --template https://github.com/username/template --dest myreactapp
 ``` 
+
+React and more templates coming soon...
+
 
 ### Start dev server
 After creating new project change your working directory to it and run: `guark dev`
 
 ### Build your app
-You can build you app with `guark build`.  
+You can build your app with `guark build`.  
 
 
 ## Cross Compiling Status.
