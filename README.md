@@ -55,7 +55,7 @@ This is a v0 "WIP" prototype of guark, still a lot to do to make it to productio
 
 Install guark cli tool.
 ```bash
-go install github.com/guark/guark/cmd/guark
+go get -u github.com/guark/guark/cmd/guark
 ```
 
 If you on Linux ❤   you need to install `webkit2gtk3`:
