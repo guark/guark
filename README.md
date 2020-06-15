@@ -53,7 +53,7 @@ This is a v0 "WIP" prototype of guark, still a lot to do to make it to productio
 
 ## 📜   Installation
 
-Install guark cli tool.
+Install guark cli tool:
 ```bash
 go get -u github.com/guark/guark/cmd/guark
 ```
