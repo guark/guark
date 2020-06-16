@@ -16,29 +16,29 @@
 </p>
 
 
-## 🖳 About The Project
+## 🖳  About The Project
 
 Guark is an open-source framework to build cross platform desktop GUI applications.
 
-### 📢   What Guark stands for?
+### 📢 What Guark stands for?
 
 Go + Quark = Guark
 
-### 🔮   Guark mission
+### 🔮 Guark mission
 
 Simplify cross platform desktop apps development.
 
-### 🎸   How it works
+### 🎸 How it works
 
 Demo Video: https://youtu.be/_k_tq9sj-do
 
-Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (Vue.js, React.js, etc...), while Guark javascript API allows you to communicate between your Go and UI JS framework, and calling your exported Go functions and plugin(s) methods.
+Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (Vue.js, React.js, etc...), and with Guark javascript API you can communicate between your Go and UI framework, and calling your exported Go functions and plugin(s) methods.
 
-### 🙏   Important note
+### 🙏 Important note
 
 This is a v0 "WIP" prototype of guark, still a lot to do to make it to production v1. your feedback is very appreciated.
 
-## 💌  Features
+## 💌  Features
 
 - Desktop applications with GO ♥
 - One codebase for: Linux, MacOS, and Windows
@@ -53,46 +53,50 @@ This is a v0 "WIP" prototype of guark, still a lot to do to make it to productio
 - And more..
 
 
-## 📜   Installation
+## 📜  Installation
 
-Install guark cli tool:
+Install guark CLI tool:
 ```bash
 go get -u github.com/guark/guark/cmd/guark
 ```
 
-If you on Linux ❤   you need to install `webkit2gtk3`:
+If you're on Linux ❤ you need to install some requirements:
+
 ```bash
 // fedora
-sudo dnf install webkit2gtk3-devel
+sudo dnf install gtk3-devel webkit2gtk3-devel gcc-c++ pkgconf-pkg-config
 
 // Ubuntu
-sudo apt install libwebkit2gtk-4.0-dev
+sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev build-essential
 ```
 
 ## Getting Started
 
-After installing guark CLI tool, the next step is to create a new guark project based on template that you like:
+After installing guark CLI tool, the next step is to create a new guark project based on the template that you like:
 
-### Create new project
+### Create a new project
 
 ```bash
 guark new --template vue --dest myapp
 ``` 
 
-React and more templates coming soon...
-
-
 ### Start dev server
 
-After creating new project change your working directory to it and run: `guark dev`
+After creating new project change your working directory to it and run: 
+```bash
+guark dev
+```
 
 ### Build your app
 
-You can build your app with `guark build`. 
+You can build your app with
+```bash
+guark build
+``` 
 
 ### Export your first GO function to JS API
 
-You need to create a file for your function in `lib/funcs` directory.
+Create a new file in `lib/funcs` directory:
 ```go
 // lib/funcs/foo_bar.go
 
@@ -101,12 +105,15 @@ import (
 )
 
 func FooBar(c app.Context) (interface{}, error) {
-   c.App.Log.Debug("Foo bar called") 
+
+   c.App.Log.Debug("Foo bar called")
+
    return "This is a my return value to javasript", nil
 }
 ```
 
-Then export it to Guark JS API in `lib/config.go` file.
+Then export it to Guark JS API in `lib/config.go` file:
+
 ```go
 import "github.com/your_username/your_app/lib/funcs"
 
@@ -118,6 +125,7 @@ var Funcs = app.Funcs{
 ```
 
 Then you can call your function in javascript:
+
 ```js
 import g from "guark"
 
