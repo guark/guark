@@ -41,8 +41,8 @@ This is a v0 "WIP" prototype of guark, still a lot to do to make it to productio
 ## 💌  Features
 
 - Desktop applications with GO ♥
-- One codebase for: Linux, MacOS, and Windows
-- Hot Reload UI (and auto restart app on Go code change coming soon)
+- One codebase for Linux, macOS, and Windows
+- UI Hot Reload
 - You can use any front end framework
 - Using native system webview (unlike electron we do not embed chrome in the builds)
 - Cross Compile (WIP)
