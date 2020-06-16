@@ -30,6 +30,8 @@ Simplify cross platform desktop apps development.
 
 ### 🎸   How it works
 
+Demo Video: https://youtu.be/_k_tq9sj-do
+
 Guark backend and logic part handled by native Go code, while the user interfaces built with modern web technologies (Vue.js, React.js, etc...), while Guark javascript API allows you to communicate between your Go and UI JS framework, and calling your exported Go functions and plugin(s) methods.
 
 ### 🙏   Important note
@@ -150,6 +152,14 @@ sudo apt install binutils-mingw-w64
 ```
 
 You can use any cross compiler for example: `env CC=.. CXX=.. guark build --target darwin`.
+
+## Contributing
+
+PRs, issues, and feedback from ninja gophers are very welcomed.
+
+## License
+
+Guark is provided under the [MIT License](https://github.com/guark/guark/blob/master/LICENSE).
 
 ## V1 Roadmap:
 
