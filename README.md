@@ -165,10 +165,6 @@ You can use any cross compiler for example: `env CC=.. CXX=.. guark build --targ
 
 PRs, issues, and feedback from ninja gophers are very welcomed.
 
-## License
-
-Guark is provided under the [MIT License](https://github.com/guark/guark/blob/master/LICENSE).
-
 ## V1 Roadmap:
 
 - [ ] Add App Watchers.
@@ -179,4 +175,7 @@ Guark is provided under the [MIT License](https://github.com/guark/guark/blob/ma
 - [ ] Guark App Installer (Cross Platform).
 - [ ] Strip Binaries on build
 
+## License
+
+Guark is provided under the [MIT License](https://github.com/guark/guark/blob/master/LICENSE).
 
