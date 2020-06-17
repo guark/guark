@@ -123,7 +123,6 @@ func serve(pkg string, port string) (*exec.Cmd, context.CancelFunc) {
 	cmd := exec.CommandContext(ctx, pkg, "run", "serve", "--host", "127.0.0.1", "--port", port)
 	cmd.Dir = path("ui")
 	cmd.Stderr = os.Stderr
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Start()
 
 	return cmd, cancel
@@ -140,14 +139,19 @@ func start(port string, out *stdio.Output) error {
 	return cmd.Run()
 }
 
-// this function code was stolen from:
-// https://stackoverflow.com/a/29552044/5834438
+
 func kill(cmd *exec.Cmd) {
 
 	if cmd == nil {
 		return
 	}
 
-	pgid, _ := syscall.Getpgid(cmd.Process.Pid)
-	syscall.Kill(-pgid, syscall.SIGKILL)
+	proc, err := os.FindProcess(cmd.Process.Pid)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	proc.Signal(syscall.SIGTERM)
 }
