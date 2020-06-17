@@ -139,19 +139,11 @@ func start(port string, out *stdio.Output) error {
 	return cmd.Run()
 }
 
-
 func kill(cmd *exec.Cmd) {
 
 	if cmd == nil {
 		return
 	}
 
-	proc, err := os.FindProcess(cmd.Process.Pid)
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	proc.Signal(syscall.SIGTERM)
+	cmd.Process.Signal(syscall.SIGTERM)
 }
