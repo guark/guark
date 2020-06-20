@@ -1,7 +1,7 @@
 // Copyright 2020 Mohammed El Bahja. All rights reserved.
 // Use of this source code is governed by a MIT license.
 
-package actions
+package utils
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -17,8 +18,23 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func path(elem ...string) string {
+func Path(elem ...string) string {
 	return filepath.Join(append([]string{wdir}, elem...)...)
+}
+
+// Create file with dir.
+func Create(name string, mode uint32) (*os.File, error) {
+
+	dir := filepath.Dir(name)
+
+	if _, err := os.Stat(dir); err != nil {
+
+		if err = os.MkdirAll(dir, os.FileMode(mode)); err != nil {
+			return nil, err
+		}
+	}
+
+	return os.Create(name)
 }
 
 func CheckWorkingDir(c *cli.Context) (err error) {
@@ -30,7 +46,7 @@ func CheckWorkingDir(c *cli.Context) (err error) {
 	return
 }
 
-func getHost() string {
+func GetHost() string {
 
 	cmd := exec.Command("go", "env", "GOHOSTOS")
 	out, err := cmd.Output()
