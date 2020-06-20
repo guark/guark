@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/guark/guark/cmd/guark/actions"
+	"github.com/guark/guark/cmd/guark/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -24,21 +25,22 @@ func init() {
 				Aliases: []string{"bundle"},
 				Usage:   "Bundle and build guark app.",
 				Flags:   actions.BuildFlags,
-				Before:  actions.CheckWorkingDir,
+				Before:  utils.CheckWorkingDir,
 				Action:  actions.Build,
 			},
 			{
 				Name:   "dev",
 				Usage:  "Start dev app.",
 				Flags:  actions.DevFlags,
-				Before: actions.CheckWorkingDir,
+				Before: utils.CheckWorkingDir,
 				Action: actions.Dev,
 			},
 			{
-				Name:   "new",
-				Usage:  "Create new guark project.",
-				Flags:  actions.NewFlags,
-				Action: actions.New,
+				Name:    "init",
+				Aliases: []string{"new"},
+				Usage:   "Initialize a new guark project.",
+				Flags:   actions.NewFlags,
+				Action:  actions.New,
 			},
 		},
 	}
