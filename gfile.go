@@ -7,9 +7,9 @@ import (
 )
 
 // Unmarshal guark.yaml file.
-func UnmarshalGuarkFile(file string, s interface{}) (err error) {
+func UnmarshalGuarkFile(s interface{}) (err error) {
 
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := ioutil.ReadFile("guark.yaml")
 
 	if err != nil {
 		return
