@@ -44,9 +44,6 @@ type App struct {
 	// App log.
 	Log *logrus.Entry
 
-	// App assets
-	Assets *Assets
-
 	// App embeds
 	Embed *Embed
 
@@ -72,6 +69,7 @@ func (a App) IsDev() bool {
 }
 
 // Get file path from appdata dir.
+// TODO: refactor.
 func (a App) Path(elem ...string) string {
 
 	if a.IsDev() {
@@ -128,7 +126,6 @@ func New(c *Config, builtin Funcs) *App {
 		Funcs:    c.Funcs,
 		Hooks:    c.Hooks,
 		Embed:    c.Embed,
-		Assets:   c.Assets,
 		Plugins:  c.Plugins,
 		Watchers: c.Watchers,
 		bFuncs:   builtin,
