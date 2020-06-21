@@ -5,20 +5,29 @@ package actions
 
 import (
 	"fmt"
+	// "image"
 	"io/ioutil"
 	"log"
 	"os"
+
+	// "os/exec"
 	"path/filepath"
 	"reflect"
+
+	// "strings"
 	"runtime"
+	// "text/template"
 
 	"github.com/guark/guark"
 	"github.com/guark/guark/app/utils"
 	"github.com/guark/guark/cmd/guark/builders"
 	"github.com/guark/guark/cmd/guark/stdio"
+
+	// "github.com/jackmordaunt/icns"
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli/v2"
 	"github.com/zserge/webview"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -53,9 +62,11 @@ func before(b *builders.Build) (err error) {
 	// Unmarshal guark file.
 	if err = guark.UnmarshalGuarkFile(&b.Info); err != nil {
 		return
+	} else if err = unmarshalBuildFile(&b.Config); err != nil {
+		return
 	}
 
-	// check targets.
+	// Check targets.
 	for i := range b.Targets {
 
 		if err = checkTarget(b.Targets[i]); err != nil {
@@ -64,7 +75,7 @@ func before(b *builders.Build) (err error) {
 		}
 	}
 
-	// handle if dest already exists.
+	// Handle if dest already exists.
 	if utils.IsDir(b.Dest) {
 
 		if b.Clean {
@@ -86,7 +97,26 @@ func before(b *builders.Build) (err error) {
 		return
 	}
 
-	// Append builders.
+	for _, target := range b.Targets {
+
+		switch target {
+		case "linux":
+			b.Builders = append(b.Builders, &builders.LinuxBuilder{
+				Build: b,
+			})
+			break
+			// case "darwin":
+			// 	b.Builders = append(b.Builders, &builders.DarwinBuilder{
+			// 		Build: b,
+			// 	})
+			// 	break
+			// case "windows":
+			// 	b.Builders = append(b.Builders, &builders.WindowsBuilder{
+			// 		Build: b,
+			// 	})
+			// 	break
+		}
+	}
 
 	b.Log.Done("Guark build initialized ⚙️")
 	return
@@ -96,7 +126,7 @@ func build(b *builders.Build) (err error) {
 
 	for _, builder := range b.Builders {
 
-		if err = builders.Run(builder); err != nil {
+		if err = run(builder); err != nil {
 			return
 		}
 	}
@@ -107,7 +137,7 @@ func build(b *builders.Build) (err error) {
 func cleanup(b *builders.Build) {
 
 	if b.Temp != "" {
-		os.RemoveAll(b.Temp)
+		// os.RemoveAll(b.Temp)
 	}
 }
 
@@ -119,24 +149,35 @@ func Build(c *cli.Context) (err error) {
 		Clean:       c.Bool("rm"),
 		Targets:     c.StringSlice("target"),
 		BeforeFunc:  before,
-		BuildFunc:   build,
+		RunFunc:     build,
 		CleanupFunc: cleanup,
 	}
 
 	b.Builders = []builders.Builder{
 		&builders.UIBuilder{
-			Pkg:  c.String("pkg"),
-			Main: b,
+			Pkg:   c.String("pkg"),
+			Build: b,
 		},
 		&builders.EmbedBuilder{
-			Main: b,
+			Build: b,
 		},
 		&builders.MetaBuilder{
-			Main: b,
+			Build: b,
 		},
 	}
 
-	return builders.Run(b)
+	return run(b)
+}
+
+func run(builder builders.Builder) (err error) {
+
+	defer builder.Cleanup()
+
+	if err = builder.Before(); err != nil {
+		return
+	}
+
+	return builder.Run()
 }
 
 func confirmDeleteDest(dest string) error {
@@ -162,6 +203,17 @@ func confirmDeleteDest(dest string) error {
 	}
 
 	return nil
+}
+
+func unmarshalBuildFile(c interface{}) error {
+
+	cnf, err := ioutil.ReadFile("build.yaml")
+
+	if err != nil {
+		return nil
+	}
+
+	return yaml.Unmarshal(cnf, c)
 }
 
 // TODO: change value of "x64" to be based on build
