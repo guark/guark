@@ -4,37 +4,36 @@
 package window
 
 import (
-	"bytes"
-	"compress/gzip"
+	// "bytes"
 	"fmt"
-	"io"
-	"mime"
+	// "io"
+	// "mime"
 	"net"
-	"net/http"
+	// "net/http"
 	"os"
-	"path/filepath"
-	"strings"
+	// "path/filepath"
+	// "strings"
+	"runtime"
 
 	"github.com/guark/guark/app"
 	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
-	App    *app.App
-	Log    *logrus.Entry
-	Root   string
-	ln     net.Listener
-	ran    bool
-	window *Window
+	App     *app.App
+	Log     *logrus.Entry
+	ln      net.Listener
+	started bool
+	window  *Window
 }
 
 func (s *Server) Start() {
 
-	if s.ran {
-		panic("App already started!")
+	if s.started {
+		s.Log.Panic("App already started!")
 	}
 
-	s.ran = true
+	s.started = true
 
 	if s.App.IsDev() == false {
 		s.serve()
@@ -50,72 +49,22 @@ func (s Server) Addr() string {
 
 	if s.ln != nil {
 		return fmt.Sprintf("http://%s", s.ln.Addr().String())
+	} else if runtime.GOOS == "windows" {
+		return "fs"
 	}
 
 	return fmt.Sprintf("http://127.0.0.1:%s", os.Getenv("GUARK_DEBUG_PORT"))
 }
 
-func (s *Server) Stop() {
+func (s *Server) Exit() {
+	s.window.Webview.Terminate()
+}
+
+func (s *Server) Close() {
 
 	s.window.Webview.Destroy()
 
-	if s.App.IsDev() {
-		return
-	}
-
-	s.ln.Close()
-}
-
-func (s *Server) serve() {
-
-	var err error
-
-	s.ln, err = net.Listen("tcp", "127.0.0.1:0")
-
-	if err != nil {
-		panic(err)
-	}
-
-	go http.Serve(s.ln, &srvHandler{assets: s.App.Assets, log: s.Log})
-}
-
-type srvHandler struct {
-	assets *app.Assets
-	log    *logrus.Entry
-}
-
-func (h srvHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	if r.URL.Path == "/" {
-		r.URL.Path = "/index.html"
-	}
-
-	if ctype := mime.TypeByExtension(filepath.Ext(r.URL.Path)); ctype != "" {
-		w.Header().Set("Content-Type", ctype)
-	}
-
-	gz, e := h.assets.ReadAll(r.URL.Path)
-
-	if e != nil {
-		w.Write([]byte(e.Error()))
-		return
-	}
-
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-
-		w.Header().Set("Content-Encoding", "gzip")
-		w.Write(gz)
-		return
-	}
-
-	reader, e := gzip.NewReader(bytes.NewReader(gz))
-
-	if e != nil {
-		w.Write([]byte(e.Error()))
-		return
-	}
-
-	if _, err := io.Copy(w, reader); err != nil {
-		h.log.Error(err)
+	if s.ln != nil {
+		s.ln.Close()
 	}
 }
