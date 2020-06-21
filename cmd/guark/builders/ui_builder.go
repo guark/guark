@@ -17,31 +17,31 @@ type UIBuilder struct {
 	// Task/Package manager.
 	Pkg string
 
-	// Main builder.
-	Main *Build
+	// Main build.
+	Build *Build
 }
 
 func (b UIBuilder) Before() error {
 
-	b.Main.Log.Update("Building app ui.")
+	b.Build.Log.Update("Building app ui.")
 	return nil
 }
 
-func (b UIBuilder) Build() error {
+func (b UIBuilder) Run() error {
 
 	cmd := exec.Command(b.Pkg, "build")
 	cmd.Dir = utils.Path("ui")
-	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_BUILD_DIR=%s/ui", b.Main.Temp))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_BUILD_DIR=%s/ui", b.Build.Temp))
 
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
 
-		b.Main.Log.Err(string(out))
+		b.Build.Log.Err(string(out))
 		return err
 	}
 
-	b.Main.Log.Done("Guark ui builded 🙈")
+	b.Build.Log.Done("Guark ui builded 🙈")
 	return nil
 }
 

@@ -16,29 +16,29 @@ import (
 // Meta files generator.
 type MetaBuilder struct {
 
-	// Main builder.
-	Main *Build
+	// Main build.
+	Build *Build
 }
 
 func (b MetaBuilder) Before() error {
 
-	b.Main.Log.Update("Building meta files...")
+	b.Build.Log.Update("Building meta files...")
 	return nil
 }
 
 // Parse and build meta files.
-func (b MetaBuilder) Build() (err error) {
+func (b MetaBuilder) Run() (err error) {
 
 	// Make dest targets dirs.
-	for _, target := range b.Main.Targets {
+	for _, target := range b.Build.Targets {
 
-		if err = meta(b, target, b.Main.Dest); err != nil {
+		if err = meta(b, target, b.Build.Dest); err != nil {
 
 			return
 		}
 	}
 
-	b.Main.Log.Done("Guark meta files generated 🙉")
+	b.Build.Log.Done("Guark meta files generated 🙉")
 	return nil
 }
 
@@ -62,7 +62,7 @@ func meta(b MetaBuilder, osbuild string, dest string) error {
 			return nil
 		}
 
-		metaFile := filepath.Join(metaFilesDest, strings.Replace(filepath.Base(path), "_id_", b.Main.Info.ID, -1))
+		metaFile := filepath.Join(metaFilesDest, strings.Replace(filepath.Base(path), "_id_", b.Build.Info.ID, -1))
 
 		f, err := utils.Create(metaFile, 0754)
 
@@ -84,6 +84,6 @@ func meta(b MetaBuilder, osbuild string, dest string) error {
 			return err
 		}
 
-		return tmpl.Execute(f, b.Main.Info)
+		return tmpl.Execute(f, b.Build.Info)
 	})
 }

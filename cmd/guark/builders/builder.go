@@ -8,11 +8,11 @@ import "github.com/guark/guark/cmd/guark/stdio"
 // Builders/Compilers interface.
 type Builder interface {
 
-	// setup before build.
+	// Setup before run.
 	Before() error
 
-	// build the thing.
-	Build() error
+	// Run the builder.
+	Run() error
 
 	// Cleanup build.
 	Cleanup()
@@ -28,6 +28,28 @@ type Build struct {
 		Name             string `yaml:"name"`
 		License          string `yaml:"license"`
 		LogLevel         string `yaml:"logLevel"`
+	}
+
+	// Build Config
+	Config struct {
+
+		// RC for linux.
+		Linux struct {
+			Ldflags string
+		}
+
+		// RC for darwin.
+		Darwin struct {
+			Ldflags string
+		}
+
+		// Build config for windows.
+		Windows struct {
+			CC      string
+			CXX     string
+			Windres string
+			Ldflags string
+		}
 	}
 
 	// build temp dir.
@@ -49,7 +71,7 @@ type Build struct {
 	Builders []Builder
 
 	BeforeFunc  func(*Build) error
-	BuildFunc   func(*Build) error
+	RunFunc     func(*Build) error
 	CleanupFunc func(*Build)
 }
 
@@ -57,21 +79,10 @@ func (b *Build) Before() error {
 	return b.BeforeFunc(b)
 }
 
-func (b *Build) Build() error {
-	return b.BuildFunc(b)
+func (b *Build) Run() error {
+	return b.RunFunc(b)
 }
 
 func (b *Build) Cleanup() {
 	b.CleanupFunc(b)
-}
-
-func Run(builder Builder) (err error) {
-
-	defer builder.Cleanup()
-
-	if err = builder.Before(); err != nil {
-		return
-	}
-
-	return builder.Build()
 }
