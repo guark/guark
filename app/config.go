@@ -6,9 +6,6 @@ package app
 // App config.
 type Config struct {
 
-	// App assets
-	Assets *Assets
-
 	// App functios
 	Funcs Funcs
 
