@@ -13,44 +13,45 @@ import (
 )
 
 type Guark struct {
-	App    *app.App
-	srv    *window.Server
-	log    *logrus.Entry
-	exited bool
+	App *app.App
+	srv *window.Server
+	log *logrus.Entry
 }
 
 func (g *Guark) Run() (err error) {
 
-	g.log.Debug("starting guark server.")
+	g.log.Debug("Starting guark window.")
 	g.srv.Start()
 	return
 }
 
-func (g *Guark) Exit() {
+func (g *Guark) Close() {
 
-	if g.exited {
-		return
-	}
-
-	g.exited = true
-	g.srv.Stop()
+	g.srv.Close()
 }
 
 func New(c *app.Config) *Guark {
 
 	g := &Guark{
-		App: app.New(c, app.Funcs{
-			"hook": func(c app.Context) (interface{}, error) {
-
-				if c.Params.Has("name") == false {
-					return nil, fmt.Errorf("could not find hook name in params")
-				}
-
-				return nil, c.App.Hooks.Run(c.Params.Get("name").(string), c.App)
-			},
-		}),
 		log: logrus.WithFields(logrus.Fields{"context": "guark"}),
 	}
+
+	g.App = app.New(c, app.Funcs{
+		"hook": func(c app.Context) (interface{}, error) {
+
+			if c.Params.Has("name") == false {
+				return nil, fmt.Errorf("could not find hook name in params")
+			}
+
+			return nil, c.App.Hooks.Run(c.Params.Get("name").(string), c.App)
+		},
+
+		"exit": func(c app.Context) (interface{}, error) {
+
+			g.srv.Exit()
+			return nil, nil
+		},
+	})
 
 	// Load guark yaml file.
 	bs, err := g.App.Embed.Data("guark.yaml")
@@ -63,10 +64,6 @@ func New(c *app.Config) *Guark {
 
 	if err != nil {
 		g.log.Panic(err)
-	}
-
-	if g.App.Assets != nil {
-		g.App.Assets.Prefix = g.App.Path("assets")
 	}
 
 	if g.App.IsDev() {
@@ -82,14 +79,11 @@ func New(c *app.Config) *Guark {
 	}
 
 	g.srv = &window.Server{
-		App:  g.App,
-		Root: g.App.Path("static"),
-		Log:  g.log,
+		App: g.App,
+		Log: g.log,
 	}
 
-	g.log.Debug("config loaded.")
-
-	g.log.Debug("Initialize plugins.")
+	g.log.Debug("Config loaded.")
 
 	// Initialize plugins
 	for _, p := range g.App.Plugins {
@@ -123,5 +117,5 @@ func logLevel(n string) logrus.Level {
 		return logrus.PanicLevel
 	}
 
-	return logrus.ErrorLevel
+	return logrus.WarnLevel
 }
