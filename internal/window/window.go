@@ -11,6 +11,7 @@ type Window struct {
 	Webview webview.WebView
 }
 
+// Create new window.
 func NewWindow(s *Server) *Window {
 
 	wv := webview.New(s.App.IsDev())
