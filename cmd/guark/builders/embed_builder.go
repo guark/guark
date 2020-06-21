@@ -14,8 +14,8 @@ import (
 // Embeded files generator.
 type EmbedBuilder struct {
 
-	// Main builder.
-	Main *Build
+	// Main build.
+	Build *Build
 
 	// output dir.
 	dir string
@@ -23,18 +23,18 @@ type EmbedBuilder struct {
 
 func (b EmbedBuilder) Before() error {
 
-	b.Main.Log.Update("Embedding...")
+	b.Build.Log.Update("Embedding...")
 
-	b.dir = filepath.Join(b.Main.Dest, "assets")
+	b.dir = filepath.Join(b.Build.Dest, "assets")
 
 	return os.Mkdir(b.dir, 0754)
 }
 
 // Build embed.go file.
-func (b EmbedBuilder) Build() error {
+func (b EmbedBuilder) Run() error {
 
 	files := []string{"guark.yaml"}
-	src := filepath.Join(b.Main.Temp, "ui")
+	src := filepath.Join(b.Build.Temp, "ui")
 	err := filepath.Walk(src, func(path string, i os.FileInfo, err error) error {
 
 		if err != nil {
@@ -57,10 +57,10 @@ func (b EmbedBuilder) Build() error {
 		return err
 	}
 
-	b.Main.Log.Done("Guark embed files generated 🙉")
+	b.Build.Log.Done("Guark embed files generated 🙉")
 	return nil
 }
 
-func (b *EmbedBuilder) Cleanup() {
+func (b EmbedBuilder) Cleanup() {
 
 }
