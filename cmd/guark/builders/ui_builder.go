@@ -11,7 +11,7 @@ import (
 	"github.com/guark/guark/cmd/guark/utils"
 )
 
-// Front end UI builder
+// Front-end UI builder
 type UIBuilder struct {
 
 	// Task/Package manager.

@@ -25,17 +25,17 @@ func (b EmbedBuilder) Before() error {
 
 	b.Build.Log.Update("Embedding...")
 
-	b.dir = filepath.Join(b.Build.Dest, "assets")
+	// b.dir = filepath.Join(b.Build.Dest, "assets")
 
-	return os.Mkdir(b.dir, 0754)
+	// return os.Mkdir(b.dir, 0754)
+	return nil
 }
 
 // Build embed.go file.
 func (b EmbedBuilder) Run() error {
 
 	files := []string{"guark.yaml"}
-	src := filepath.Join(b.Build.Temp, "ui")
-	err := filepath.Walk(src, func(path string, i os.FileInfo, err error) error {
+	err := filepath.Walk(filepath.Join(b.Build.Temp, "ui"), func(path string, i os.FileInfo, err error) error {
 
 		if err != nil {
 
@@ -53,7 +53,7 @@ func (b EmbedBuilder) Run() error {
 		return err
 	}
 
-	if err = embed.Embed(files, utils.Path("lib", "embed.go"), "lib", src); err != nil {
+	if err = embed.GenerateEmbed(files, utils.Path("lib", "embed.go"), "lib", b.Build.Temp); err != nil {
 		return err
 	}
 

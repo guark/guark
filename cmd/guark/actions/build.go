@@ -5,28 +5,19 @@ package actions
 
 import (
 	"fmt"
-	// "image"
 	"io/ioutil"
 	"log"
 	"os"
-
-	// "os/exec"
 	"path/filepath"
-	"reflect"
-
-	// "strings"
 	"runtime"
-	// "text/template"
+	"strings"
 
 	"github.com/guark/guark"
 	"github.com/guark/guark/app/utils"
 	"github.com/guark/guark/cmd/guark/builders"
 	"github.com/guark/guark/cmd/guark/stdio"
-
-	// "github.com/jackmordaunt/icns"
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli/v2"
-	"github.com/zserge/webview"
 	"gopkg.in/yaml.v2"
 )
 
@@ -57,7 +48,7 @@ var (
 
 func before(b *builders.Build) (err error) {
 
-	b.Log.Done("Starting...")
+	b.Log.Done(fmt.Sprintf("Build for: %s started", strings.Join(b.Targets, ", ")))
 
 	// Unmarshal guark file.
 	if err = guark.UnmarshalGuarkFile(&b.Info); err != nil {
@@ -105,16 +96,15 @@ func before(b *builders.Build) (err error) {
 				Build: b,
 			})
 			break
-			// case "darwin":
-			// 	b.Builders = append(b.Builders, &builders.DarwinBuilder{
-			// 		Build: b,
-			// 	})
-			// 	break
-			// case "windows":
-			// 	b.Builders = append(b.Builders, &builders.WindowsBuilder{
-			// 		Build: b,
-			// 	})
-			// 	break
+		// case "darwin":
+		// 	b.Builders = append(b.Builders, &builders.DarwinBuilder{
+		// 		Build: b,
+		// 	})
+		// 	break
+		case "windows":
+			b.Builders = append(b.Builders, &builders.WindowsBuilder{
+				Build: b,
+			})
 		}
 	}
 
@@ -137,7 +127,7 @@ func build(b *builders.Build) (err error) {
 func cleanup(b *builders.Build) {
 
 	if b.Temp != "" {
-		// os.RemoveAll(b.Temp)
+		os.RemoveAll(b.Temp)
 	}
 }
 
@@ -214,25 +204,6 @@ func unmarshalBuildFile(c interface{}) error {
 	}
 
 	return yaml.Unmarshal(cnf, c)
-}
-
-// TODO: change value of "x64" to be based on build
-func getDlls() string {
-	return filepath.Join(os.Getenv("GOPATH"), "src", pkgPath(webview.New(true)), "dll", "x64")
-}
-
-// this function code was stolen from:
-// https://stackoverflow.com/a/60846213/5834438
-func pkgPath(v interface{}) string {
-	if v == nil {
-		return ""
-	}
-
-	val := reflect.ValueOf(v)
-	if val.Kind() == reflect.Ptr {
-		return val.Elem().Type().PkgPath()
-	}
-	return val.Type().PkgPath()
 }
 
 func getBuildDir(target string, dir string) (string, error) {

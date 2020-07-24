@@ -4,13 +4,14 @@
 package builders
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	// "github.com/otiai10/copy"
 )
 
-// Embeded files generator.
+// Linux app builder.
 type LinuxBuilder struct {
 
 	// Main build.
@@ -28,7 +29,8 @@ func (b LinuxBuilder) Run() error {
 
 	var (
 		flags []string
-		dest  string = filepath.Join(b.Build.Dest, "linux", b.Build.Info.ID)
+		env   []string = []string{"CGO_ENABLED=1", "GOOS=linux"}
+		dest  string   = filepath.Join(b.Build.Dest, "linux", b.Build.Info.ID)
 	)
 
 	// Set ldflags
@@ -38,7 +40,15 @@ func (b LinuxBuilder) Run() error {
 
 	flags = append(flags, "-o", dest)
 
-	if err := compile(flags, []string{}); err != nil {
+	if b.Build.Config.Linux.CC != "" {
+		env = append(env, fmt.Sprintf("CC=%s", b.Build.Config.Linux.CC))
+	}
+
+	if b.Build.Config.Linux.CXX != "" {
+		env = append(env, fmt.Sprintf("CXX=%s", b.Build.Config.Linux.CXX))
+	}
+
+	if err := compile(flags, env); err != nil {
 		return err
 	}
 
