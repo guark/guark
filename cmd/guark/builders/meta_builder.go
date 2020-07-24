@@ -46,7 +46,9 @@ func (b MetaBuilder) Cleanup() {
 
 }
 
-// Parse meta files. then move them in dest dir. and replace _id_ in path with App id.
+// Parse meta files
+// Then save them in dest dir and
+// Replace "_id_" in path with App id.
 func meta(b MetaBuilder, osbuild string, dest string) error {
 
 	metaFilesDir := utils.Path("res", "meta", osbuild)

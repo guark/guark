@@ -5,7 +5,7 @@ package builders
 
 import "github.com/guark/guark/cmd/guark/stdio"
 
-// Builders/Compilers interface.
+// Builders/Compilers/Packagers interface.
 type Builder interface {
 
 	// Setup before run.
@@ -23,7 +23,7 @@ type Build struct {
 	// App build info.
 	Info struct {
 		GuarkFileVersion string `yaml:"guark"`
-		Version          string `yaml:"version"`
+		Version          string `yaml:"version"` // App version
 		ID               string `yaml:"id"`
 		Name             string `yaml:"name"`
 		License          string `yaml:"license"`
@@ -35,11 +35,15 @@ type Build struct {
 
 		// RC for linux.
 		Linux struct {
+			CC      string
+			CXX     string
 			Ldflags string
 		}
 
 		// RC for darwin.
 		Darwin struct {
+			CC      string
+			CXX     string
 			Ldflags string
 		}
 
@@ -70,6 +74,7 @@ type Build struct {
 	// Builders
 	Builders []Builder
 
+	// Builder funcs
 	BeforeFunc  func(*Build) error
 	RunFunc     func(*Build) error
 	CleanupFunc func(*Build)
