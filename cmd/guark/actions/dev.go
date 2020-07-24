@@ -44,7 +44,7 @@ func Dev(c *cli.Context) error {
 		}
 	)
 
-	if err = embed.Embed([]string{"guark.yaml"}, Path("lib", "embed.go"), "lib", ""); err != nil {
+	if err = embed.GenerateEmbed([]string{"guark.yaml"}, Path("lib", "embed.go"), "lib", ""); err != nil {
 		return err
 	}
 
