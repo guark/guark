@@ -13,18 +13,27 @@ import (
 	"github.com/guark/guark/app/utils"
 )
 
-type EmbedGenerator struct {
-	Root     string
-	Template string
-	Funcs    map[string]func(file string, data []byte) string
-}
+type (
+	Item struct {
+		ID   string
+		Path string
+		Data []byte
+	}
 
-func (e EmbedGenerator) Build(files []string) ([]byte, error) {
+	Embed struct {
+		Root     string
+		Template string
+		Funcs    map[string]func(file string, data []byte) string
+	}
+)
+
+// Build embed file.
+func (e Embed) Build(files []string) ([]byte, error) {
 
 	var (
 		err    error
-		bytes  []byte
-		embeds = map[string][]byte{}
+		data   []byte
+		embeds []*Item
 	)
 
 	for i := range files {
@@ -33,17 +42,22 @@ func (e EmbedGenerator) Build(files []string) ([]byte, error) {
 			continue
 		}
 
-		if bytes, err = ioutil.ReadFile(files[i]); err != nil {
+		if data, err = ioutil.ReadFile(files[i]); err != nil {
 			return nil, err
 		}
 
-		embeds[strings.Replace(files[i], e.Root, "", 1)] = bytes
+		embeds = append(embeds, &Item{
+			ID:   strings.Replace(files[i], e.Root, "", 1),
+			Path: files[i],
+			Data: data,
+		})
 	}
 
 	return e.parse(embeds)
 }
 
-func (e EmbedGenerator) parse(embeds map[string][]byte) ([]byte, error) {
+// Parse embed template and return bytes.
+func (e Embed) parse(embeds []*Item) ([]byte, error) {
 
 	funcs := map[string]interface{}{
 		"stringify": stringify,
@@ -75,7 +89,7 @@ func (e EmbedGenerator) parse(embeds map[string][]byte) ([]byte, error) {
 // Generate embedable code from list of files, it returns parsed template and error.
 func Generate(files []string, root string, tmpl string) ([]byte, error) {
 
-	e := &EmbedGenerator{
+	e := &Embed{
 		Root:     root,
 		Template: tmpl,
 	}

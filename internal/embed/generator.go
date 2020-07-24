@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func Embed(files []string, destFile string, pkg string, root string) error {
+func GenerateEmbed(files []string, destFile string, pkg string, root string) error {
 
 	d, err := os.Create(destFile)
 
@@ -29,15 +29,15 @@ import (
 
 var Embeds = &app.Embed{
 	Files: map[string]*[]byte{
-		{{- range $name, $bytes := .embeds }}
-		"{{ $name }}": &{{ stringify $bytes }},
+		{{- range $embed := .embeds }}
+		"{{ $embed.ID }}": &{{ stringify $embed.Data }},
 		{{- end }}
 	},
 }
 
 `, pkg)
 
-	e := &EmbedGenerator{
+	e := &Embed{
 		Root:     root,
 		Template: tmpl,
 	}
