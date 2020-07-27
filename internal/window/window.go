@@ -4,7 +4,7 @@
 package window
 
 import (
-	"github.com/zserge/webview"
+	"github.com/webview/webview"
 )
 
 type Window struct {

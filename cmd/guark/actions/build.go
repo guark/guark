@@ -23,7 +23,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/otiai10/copy"
 	"github.com/urfave/cli/v2"
-	"github.com/zserge/webview"
+	"github.com/webview/webview"
 )
 
 var (
