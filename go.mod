@@ -18,7 +18,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/theckman/yacspin v0.8.0
 	github.com/urfave/cli/v2 v2.2.0
-	github.com/zserge/webview v0.0.0-20200516134046-4caf698fad53
+	github.com/webview/webview v0.0.0-20200724072439-e0c01595b361
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
