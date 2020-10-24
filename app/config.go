@@ -6,9 +6,6 @@ package app
 // App config.
 type Config struct {
 
-	// App assets
-	Assets *Assets
-
 	// App functios
 	Funcs Funcs
 
@@ -17,9 +14,6 @@ type Config struct {
 
 	// App plugins.
 	Plugins Plugins
-
-	// App watchers.
-	Watchers []Watcher
 
 	Embed *Embed
 }

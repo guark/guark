@@ -1,7 +1,7 @@
 // Copyright 2020 Mohammed El Bahja. All rights reserved.
 // Use of this source code is governed by a MIT license.
 
-package stdio
+package utils
 
 import (
 	"fmt"
@@ -32,6 +32,17 @@ func (o Output) Update(s string) {
 func (o Output) Done(s string) {
 	o.spinner.Stop()
 	fmt.Println(fmt.Sprintf("%s %s", colors.Green("✔"), colors.Cyan(s)))
+}
+
+func (o Output) Info(i string, s string) {
+
+	o.spinner.Stop()
+
+	if i == "" {
+		i = "･"
+	}
+
+	fmt.Println(fmt.Sprintf("%s %s", colors.Cyan(i), colors.Blue(s)))
 }
 
 func (o Output) Err(s string) {

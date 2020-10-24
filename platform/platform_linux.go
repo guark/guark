@@ -2,6 +2,5 @@
 
 package platform
 
-//
-// Install path is /usr/share/{appId}/
+// Install path must be /usr/share/{appId}/
 const DATA_DIR = "/usr/share"

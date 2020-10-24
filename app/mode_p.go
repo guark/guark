@@ -2,4 +2,4 @@
 
 package app
 
-const APP_MODE = "production"
+const APP_MODE = "prod"
