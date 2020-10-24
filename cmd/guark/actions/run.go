@@ -6,17 +6,15 @@ package actions
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
-	"github.com/guark/guark"
-	"github.com/guark/guark/app/utils"
-	"github.com/guark/guark/cmd/guark/stdio"
+	. "github.com/guark/guark/cmd/guark/utils"
+	"github.com/guark/guark/embed"
+	"github.com/guark/guark/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -34,10 +32,9 @@ func Dev(c *cli.Context) error {
 
 	var (
 		err      error
-		b        = build{}
+		out      = NewWriter()
 		sig      = make(chan os.Signal)
-		out      = stdio.NewWriter()
-		lock     = path("ui", "guark.lock")
+		lock     = Path("ui", "guark.lock")
 		cmd      *exec.Cmd
 		cancel   context.CancelFunc
 		teardown = func(c *exec.Cmd, cancel context.CancelFunc) {
@@ -46,33 +43,8 @@ func Dev(c *cli.Context) error {
 		}
 	)
 
-	if err = guark.UnmarshalGuarkFile("guark.yaml", &b); err != nil {
-
+	if err = embed.GenerateEmbed([]string{"guark.yaml"}, Path("lib", "embed.go"), "lib", ""); err != nil {
 		return err
-
-	} else if err = b.embed([]string{"guark.yaml"}, ""); err != nil {
-
-		return err
-	}
-
-	// Create assets.go if not exists.
-	if utils.IsFile(filepath.Join(wdir, "lib", "assets.go")) == false {
-
-		tmp, err := ioutil.TempDir("", "guark")
-
-		if err != nil {
-			return err
-		}
-
-		// Clear tmp.
-		defer os.RemoveAll(tmp)
-
-		os.Mkdir(filepath.Join(tmp, "ui"), 0755)
-
-		if err = b.assets(tmp); err != nil {
-
-			return err
-		}
 	}
 
 	port, err := utils.GetNewPort()
@@ -121,14 +93,14 @@ func serve(pkg string, port string) (*exec.Cmd, context.CancelFunc) {
 	)
 
 	cmd := exec.CommandContext(ctx, pkg, "run", "serve", "--host", "127.0.0.1", "--port", port)
-	cmd.Dir = path("ui")
+	cmd.Dir = Path("ui")
 	cmd.Stderr = os.Stderr
 	cmd.Start()
 
 	return cmd, cancel
 }
 
-func start(port string, out *stdio.Output) error {
+func start(port string, out *Output) error {
 
 	cmd := exec.Command("go", "run", "-tags", "dev", "app.go")
 	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_DEBUG_PORT=%s", port))
