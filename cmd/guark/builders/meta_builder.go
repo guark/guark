@@ -13,7 +13,7 @@ import (
 	"github.com/guark/guark/cmd/guark/utils"
 )
 
-// Meta files generator.
+// Meta files builder.
 type MetaBuilder struct {
 
 	// Main build.
@@ -38,7 +38,7 @@ func (b MetaBuilder) Run() (err error) {
 		}
 	}
 
-	b.Build.Log.Done("Guark meta files generated 🙉")
+	b.Build.Log.Done("MetaBuilder done 🙉")
 	return nil
 }
 

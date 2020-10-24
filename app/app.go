@@ -7,17 +7,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/guark/guark/app/platform"
-	"github.com/sirupsen/logrus"
+	"github.com/guark/guark/log"
+	"github.com/guark/guark/platform"
 )
 
 // App!
 type App struct {
 
 	// Config format version.
-	Guark string `yaml:"guark"`
+	Ver string `yaml:"guark"`
 
 	// App id must be unique!
 	ID string `yaml:"id"`
@@ -41,26 +40,22 @@ type App struct {
 	// App log level.
 	LogLevel string `yaml:"logLevel"`
 
+	EngineName string `yaml:"engine"`
+
 	// App log.
-	Log *logrus.Entry
+	Log log.Log
 
 	// App embeds
 	Embed *Embed
 
-	// App functios
-	Funcs Funcs
-
-	// App hooks.
 	Hooks Hooks
+
+	Funcs Funcs
 
 	// App plugins.
 	Plugins Plugins
 
-	// App watchers.
-	Watchers []Watcher
-
-	// Builtin functions
-	bFuncs Funcs
+	Engine Engine
 }
 
 // Check if app running in dev mode.
@@ -68,8 +63,55 @@ func (a App) IsDev() bool {
 	return APP_MODE == "dev"
 }
 
+func (a App) Run() error {
+
+	if err := a.init(); err != nil {
+		return err
+	}
+
+	return a.Engine.Run()
+}
+
+func (a App) Quit() {
+	a.Engine.Quit()
+}
+
+func (a *App) init() error {
+
+	a.Engine.Bind("exit", func(c Context) (interface{}, error) {
+		a.Quit()
+		return nil, nil
+	})
+
+	a.Engine.Bind("hook", func(c Context) (interface{}, error) {
+
+		if !c.Has("name") {
+			return nil, fmt.Errorf("hook name required!")
+		}
+
+		return nil, a.Hooks.Run(c.Get("name").(string), a)
+	})
+
+	// Bind app functions.
+	for name, fn := range a.Funcs {
+		if err := a.Engine.Bind(name, fn); err != nil {
+			return err
+		}
+	}
+
+	// Bind plugin functions.
+	for id, plugin := range a.Plugins {
+		for name, fn := range plugin.GetFuncs() {
+			if err := a.Engine.Bind(fmt.Sprintf("%s$%s", id, name), fn); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 // Get file path from appdata dir.
-// TODO: refactor.
 func (a App) Path(elem ...string) string {
 
 	if a.IsDev() {
@@ -77,57 +119,11 @@ func (a App) Path(elem ...string) string {
 		cwd, err := os.Getwd()
 
 		if err != nil {
-			panic(err)
+			a.Log.Panic(err)
 		}
 
-		return filepath.Join(append([]string{cwd, "res"}, elem...)...)
+		return filepath.Join(append([]string{cwd, "res", "static"}, elem...)...)
 	}
 
-	return filepath.Join(append([]string{platform.DATA_DIR, a.ID, "datadir"}, elem...)...)
-}
-
-// Call a func.
-func (a *App) Call(fn string, args map[string]interface{}) (interface{}, error) {
-
-	name := strings.Split(fn, ".")
-
-	if len(name) > 2 || fn == "" {
-
-		return nil, fmt.Errorf("Invalid func name: %s", fn)
-
-	} else if len(name) == 2 {
-
-		if _, ok := a.Plugins[name[0]]; ok {
-
-			funcs := a.Plugins[name[0]].GetFuncs()
-
-			if fnc, ok := funcs[name[1]]; ok {
-				return fnc(NewContext(a, args))
-			}
-		}
-
-		return nil, fmt.Errorf("Could not find func name: %s", fn)
-
-	} else if fnc, ok := a.bFuncs[fn]; ok {
-
-		return fnc(NewContext(a, args))
-
-	} else if fnc, ok := a.Funcs[fn]; ok {
-
-		return fnc(NewContext(a, args))
-	}
-
-	return nil, fmt.Errorf("Invalid func call: %s", fn)
-}
-
-func New(c *Config, builtin Funcs) *App {
-	return &App{
-		Log:      logrus.WithFields(logrus.Fields{"context": "app"}),
-		Funcs:    c.Funcs,
-		Hooks:    c.Hooks,
-		Embed:    c.Embed,
-		Plugins:  c.Plugins,
-		Watchers: c.Watchers,
-		bFuncs:   builtin,
-	}
+	return filepath.Join(append([]string{platform.DATA_DIR, a.ID}, elem...)...)
 }

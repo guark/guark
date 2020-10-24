@@ -48,11 +48,11 @@ func (b LinuxBuilder) Run() error {
 		env = append(env, fmt.Sprintf("CXX=%s", b.Build.Config.Linux.CXX))
 	}
 
-	if err := compile(flags, env); err != nil {
+	if err := gobuild(flags, env); err != nil {
 		return err
 	}
 
-	b.Build.Log.Done("Guark linux app compiled 🙉")
+	b.Build.Log.Done("LinuxBuilder done 🙉")
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (b LinuxBuilder) Cleanup() {
 
 }
 
-func compile(flags []string, env []string) error {
+func gobuild(flags []string, env []string) error {
 
 	cmd := exec.Command("go", append([]string{"build"}, flags...)...)
 	cmd.Env = append(os.Environ(), env...)

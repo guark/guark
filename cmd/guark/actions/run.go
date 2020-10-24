@@ -12,10 +12,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/guark/guark/app/utils"
-	"github.com/guark/guark/cmd/guark/stdio"
 	. "github.com/guark/guark/cmd/guark/utils"
-	"github.com/guark/guark/internal/embed"
+	"github.com/guark/guark/embed"
+	"github.com/guark/guark/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -33,7 +32,7 @@ func Dev(c *cli.Context) error {
 
 	var (
 		err      error
-		out      = stdio.NewWriter()
+		out      = NewWriter()
 		sig      = make(chan os.Signal)
 		lock     = Path("ui", "guark.lock")
 		cmd      *exec.Cmd
@@ -101,7 +100,7 @@ func serve(pkg string, port string) (*exec.Cmd, context.CancelFunc) {
 	return cmd, cancel
 }
 
-func start(port string, out *stdio.Output) error {
+func start(port string, out *Output) error {
 
 	cmd := exec.Command("go", "run", "-tags", "dev", "app.go")
 	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_DEBUG_PORT=%s", port))

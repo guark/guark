@@ -2,6 +2,5 @@
 
 package platform
 
-//
-// Install path is /Applications/{appId}/
+// Install path must be /Applications/{appId}/
 const DATA_DIR = "/Applications"

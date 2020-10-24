@@ -1,10 +1,11 @@
+// Copyright 2020 Mohammed El Bahja. All rights reserved.
+// Use of this source code is governed by a MIT license.
+
 package app
 
 type (
-	// JS API call params
-	Params struct {
-		values map[string]interface{}
-	}
+	// JS call params
+	Params map[string]interface{}
 
 	// Func context
 	Context struct {
@@ -21,19 +22,19 @@ type (
 
 // Params len
 func (p Params) Len() int {
-	return len(p.values)
+	return len(p)
 }
 
 // Get value by key.
 func (p Params) Get(key string) interface{} {
-	return p.values[key]
+	return p[key]
 }
 
 // Get if key exists, if not return default.
 func (p Params) GetOr(key string, def interface{}) interface{} {
 
 	if p.Has(key) {
-		return p.values[key]
+		return p[key]
 	}
 
 	return def
@@ -41,15 +42,13 @@ func (p Params) GetOr(key string, def interface{}) interface{} {
 
 // Check params if has a key.
 func (p Params) Has(key string) bool {
-	_, ok := p.values[key]
+	_, ok := p[key]
 	return ok
 }
 
 func NewContext(a *App, params map[string]interface{}) Context {
 	return Context{
-		App: a,
-		Params: Params{
-			values: params,
-		},
+		App:    a,
+		Params: params,
 	}
 }

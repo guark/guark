@@ -6,7 +6,7 @@
     <p>Guark allows you to build beautiful user interfaces using modern web technologies such as Vue.js, React.js..., while your app logic handled and powered by the amazing <b>Go</b>.</p>
 </div>
 
-![Guark Framework7 Demo App](https://github.com/guark/guark/raw/master/testdata/demo.png)
+![Guark Framework7 Demo App](https://github.com/guark/guark/raw/master/demo.png)
 
 <p align="center">
     <a href="#installation">Installation</a> ❘
@@ -78,11 +78,11 @@ After installing guark CLI tool, the next step is to create a new guark project 
 
 ```bash
 guark new --template vue --dest myapp
-``` 
+```
 
 ### Start dev server
 
-After creating new project change your working directory to it and run: 
+After creating new project change your working directory to it and run:
 ```bash
 guark dev
 ```
@@ -92,7 +92,7 @@ guark dev
 You can build your app with
 ```bash
 guark build
-``` 
+```
 
 ### Export your first GO function to JS API
 

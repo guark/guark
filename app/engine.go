@@ -3,8 +3,8 @@
 
 package app
 
-type Watcher interface {
-
-	// Watcher routine.
-	Watch(*App)
+type Engine interface {
+	Run() error
+	Bind(name string, fn Func) error
+	Quit()
 }
