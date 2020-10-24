@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/guark/guark/app"
-	"github.com/guark/guark/internal/server"
+	"github.com/guark/guark/server"
 	"github.com/webview/webview"
 )
 
