@@ -15,8 +15,5 @@ type Config struct {
 	// App plugins.
 	Plugins Plugins
 
-	// App watchers.
-	Watchers []Watcher
-
 	Embed *Embed
 }

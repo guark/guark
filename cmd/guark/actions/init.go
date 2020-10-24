@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/guark/guark/cmd/guark/stdio"
+	"github.com/guark/guark/cmd/guark/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
@@ -37,20 +37,20 @@ var (
 	}
 )
 
-// UI setup commands
-type setup struct {
-	Version  string `yaml:"guark"`
+// Setup commands
+type SetupCommands struct {
 	Commands []struct {
-		Cmd  string   `yaml:"cmd"`
-		Args []string `yaml:"args"`
+		Cmd string   `yaml:"cmd"`
+		Dir string   `yaml:"dir,omitempty"`
+		Env []string `yaml:"env"`
 	} `yaml:"setup"`
 }
 
 func New(c *cli.Context) (err error) {
 
 	var (
-		out      = stdio.NewWriter()
-		dest     = "" //path(c.String("dest"))
+		out      = utils.NewWriter()
+		dest     = utils.Path(c.String("dest"))
 		template string
 	)
 
@@ -67,16 +67,16 @@ func New(c *cli.Context) (err error) {
 		return
 	}
 
-	// if IsUrl(template) == false {
-	// 	template = fmt.Sprintf("https://github.com/guark/%s", template)
-	// }
+	if utils.IsUrl(template) == false {
+		template = fmt.Sprintf("https://github.com/guark/%s", template)
+	}
 
 	out.Update("Checking remote template")
 
-	// // Validate remote repo.
-	// if _, err = GitFile(template, "guark.yaml", os.Getenv("GUARK_GIT_AUTH")); err != nil {
-	// 	return
-	// }
+	// Validate remote repo.
+	if _, err = utils.GitFile(template, "guark.yaml", os.Getenv("GUARK_GIT_AUTH")); err != nil {
+		return
+	}
 
 	out.Done("Remote template validated")
 	out.Update(fmt.Sprintf("Downloading: %s", template))
@@ -107,7 +107,7 @@ func New(c *cli.Context) (err error) {
 
 	out.Done("App module name refactored")
 
-	err = setupUI(dest)
+	err = runSetupCommands(out, dest)
 
 	if err == nil {
 		out.Done(fmt.Sprintf("Done! cd to %s and run `guark dev`.", dest))
@@ -144,37 +144,37 @@ func refactorMod(mod string, dest string) error {
 	})
 }
 
-func setupUI(dir string) error {
+func runSetupCommands(out *utils.Output, dir string) error {
 
-	data, err := ioutil.ReadFile(filepath.Join(dir, "ui", "guark-setup.yaml"))
+	data, err := ioutil.ReadFile(filepath.Join(dir, "guark-build.yaml"))
 
 	if err != nil {
 		return err
 	}
 
-	sup := setup{}
+	sup := SetupCommands{}
 
 	if err = yaml.Unmarshal(data, &sup); err != nil {
 		return err
 	}
 
 	if len(sup.Commands) > 0 {
-		err = confirmAndRun(sup, dir)
+		err = confirmAndRunSetupCommands(out, sup, dir)
 	}
 
 	return err
 }
 
-func confirmAndRun(s setup, dest string) error {
+func confirmAndRunSetupCommands(out *utils.Output, s SetupCommands, dest string) error {
 
-	fmt.Println("⏺ UI setup commands (Verify them before confirm):")
+	fmt.Println("⏺ Setup commands (Verify them before confirm):")
 
 	for _, v := range s.Commands {
-		fmt.Println(fmt.Sprintf("  - %s %s", v.Cmd, strings.Join(v.Args, " ")))
+		fmt.Println(fmt.Sprintf(`  - "%s" (dir: %s)`, v.Cmd, v.Dir))
 	}
 
 	prompt := promptui.Prompt{
-		Label:     "Do you want to run setup commands on your machine (Enter for N)",
+		Label:     "Do you want to run this commands on your machine (Enter for No)",
 		IsConfirm: true,
 		Validate: func(v string) error {
 
@@ -183,9 +183,6 @@ func confirmAndRun(s setup, dest string) error {
 			}
 
 			return nil
-		},
-		Templates: &promptui.PromptTemplates{
-			Success: `{{ green "✔"}} {{ cyan "You allowed setup commands:" }} `,
 		},
 	}
 
@@ -197,8 +194,11 @@ func confirmAndRun(s setup, dest string) error {
 
 	} else if yes == "Y" {
 
+		out.Update("Running setup commands...")
+
 		for _, v := range s.Commands {
-			if err = runSetupCommand(dest, v.Cmd, v.Args); err != nil {
+			out.Update(fmt.Sprintf("Running setup command: %s", v.Cmd))
+			if err = runSetupCommand(filepath.Join(dest, v.Dir), strings.Split(v.Cmd, " "), v.Env); err != nil {
 				break
 			}
 		}
@@ -207,10 +207,11 @@ func confirmAndRun(s setup, dest string) error {
 	return err
 }
 
-func runSetupCommand(dir string, c string, args []string) error {
-	cmd := exec.Command(c, args...)
-	cmd.Dir = filepath.Join(dir, "ui")
-	cmd.Stdout = os.Stdout
+func runSetupCommand(dir string, c []string, env []string) error {
+	cmd := exec.Command(c[0], c[1:]...)
+	cmd.Dir = dir
+	cmd.Env = append(os.Environ(), env...)
+	cmd.Stdout = ioutil.Discard
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }

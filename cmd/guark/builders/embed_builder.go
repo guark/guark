@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 
 	"github.com/guark/guark/cmd/guark/utils"
-	"github.com/guark/guark/internal/embed"
+	"github.com/guark/guark/embed"
 )
 
-// Embeded files generator.
+// Embeded files builder.
 type EmbedBuilder struct {
 
 	// Main build.
@@ -23,11 +23,7 @@ type EmbedBuilder struct {
 
 func (b EmbedBuilder) Before() error {
 
-	b.Build.Log.Update("Embedding...")
-
-	// b.dir = filepath.Join(b.Build.Dest, "assets")
-
-	// return os.Mkdir(b.dir, 0754)
+	b.Build.Log.Update("EmbedBuilder...")
 	return nil
 }
 
@@ -57,7 +53,7 @@ func (b EmbedBuilder) Run() error {
 		return err
 	}
 
-	b.Build.Log.Done("Guark embed files generated 🙉")
+	b.Build.Log.Done("EmbedBuilder done 🙉")
 	return nil
 }
 

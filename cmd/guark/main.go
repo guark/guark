@@ -14,33 +14,32 @@ import (
 
 var app *cli.App
 
+// TODO: add bundle cmd
 func init() {
 
 	app = &cli.App{
 		Name:  "Guark",
-		Usage: "Guark framework command line interface.",
+		Usage: "Guark framework CLI tool.",
 		Commands: []*cli.Command{
 			{
-				Name:    "build",
-				Aliases: []string{"bundle"},
-				Usage:   "Bundle and build guark app.",
-				Flags:   actions.BuildFlags,
-				Before:  utils.CheckWorkingDir,
-				Action:  actions.Build,
+				Name:   "build",
+				Usage:  "Build guark app.",
+				Flags:  actions.BuildFlags,
+				Before: utils.CheckWorkingDir,
+				Action: actions.Build,
 			},
 			{
-				Name:   "dev",
-				Usage:  "Start dev app.",
+				Name:   "run",
+				Usage:  "Start and run dev app.",
 				Flags:  actions.DevFlags,
 				Before: utils.CheckWorkingDir,
 				Action: actions.Dev,
 			},
 			{
-				Name:    "init",
-				Aliases: []string{"new"},
-				Usage:   "Initialize a new guark project.",
-				Flags:   actions.NewFlags,
-				Action:  actions.New,
+				Name:   "init",
+				Usage:  "Initialize a new guark project.",
+				Flags:  actions.NewFlags,
+				Action: actions.New,
 			},
 		},
 	}

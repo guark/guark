@@ -50,7 +50,7 @@ func (b WindowsBuilder) Run() error {
 		env = append(env, fmt.Sprintf("CXX=%s", b.Build.Config.Windows.CXX))
 	}
 
-	if err := compile(flags, env); err != nil {
+	if err := gobuild(flags, env); err != nil {
 		return err
 	}
 
@@ -58,7 +58,7 @@ func (b WindowsBuilder) Run() error {
 		return err
 	}
 
-	b.Build.Log.Done("Guark windows app compiled 🙉")
+	b.Build.Log.Done("WindowsBuilder done 🙉")
 	return nil
 }
 

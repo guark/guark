@@ -10,7 +10,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/guark/guark/app/utils"
+	"github.com/guark/guark/utils"
 )
 
 type (

@@ -3,7 +3,7 @@
 
 package builders
 
-import "github.com/guark/guark/cmd/guark/stdio"
+import "github.com/guark/guark/cmd/guark/utils"
 
 // Builders/Compilers/Packagers interface.
 type Builder interface {
@@ -60,7 +60,7 @@ type Build struct {
 	Temp string
 
 	// build logs output.
-	Log *stdio.Output
+	Log *utils.Output
 
 	// Build dest.
 	Dest string

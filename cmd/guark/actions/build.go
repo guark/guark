@@ -12,10 +12,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/guark/guark"
-	"github.com/guark/guark/app/utils"
 	"github.com/guark/guark/cmd/guark/builders"
-	"github.com/guark/guark/cmd/guark/stdio"
+	. "github.com/guark/guark/cmd/guark/utils"
+	"github.com/guark/guark/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
@@ -51,7 +50,7 @@ func before(b *builders.Build) (err error) {
 	b.Log.Done(fmt.Sprintf("Build for: %s started", strings.Join(b.Targets, ", ")))
 
 	// Unmarshal guark file.
-	if err = guark.UnmarshalGuarkFile(&b.Info); err != nil {
+	if err = utils.UnmarshalGuarkFile(".", &b.Info); err != nil {
 		return
 	} else if err = unmarshalBuildFile(&b.Config); err != nil {
 		return
@@ -134,7 +133,7 @@ func cleanup(b *builders.Build) {
 func Build(c *cli.Context) (err error) {
 
 	b := &builders.Build{
-		Log:         stdio.NewWriter(),
+		Log:         NewWriter(),
 		Dest:        c.String("dest"),
 		Clean:       c.Bool("rm"),
 		Targets:     c.StringSlice("target"),
@@ -197,7 +196,7 @@ func confirmDeleteDest(dest string) error {
 
 func unmarshalBuildFile(c interface{}) error {
 
-	cnf, err := ioutil.ReadFile("build.yaml")
+	cnf, err := ioutil.ReadFile("guark-build.yaml")
 
 	if err != nil {
 		return nil
