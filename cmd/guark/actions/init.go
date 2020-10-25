@@ -63,7 +63,7 @@ func New(c *cli.Context) (err error) {
 
 	} else if isCleanDir(dest) == false {
 
-		err = fmt.Errorf("Destination path %s is not empty (you can add `--dest new_dir`)!", dest)
+		err = fmt.Errorf("Destination path %s is not empty!", dest)
 		return
 	}
 
@@ -88,7 +88,7 @@ func New(c *cli.Context) (err error) {
 	out.Done("Template downloaded successfully.")
 
 	prompt := promptui.Prompt{
-		Label:     "Type your app module name",
+		Label:     "Change the app module name to yours:",
 		Default:   "github.com/melbahja/myapp",
 		AllowEdit: true,
 		Templates: &promptui.PromptTemplates{
@@ -110,7 +110,7 @@ func New(c *cli.Context) (err error) {
 	err = runSetupCommands(out, dest)
 
 	if err == nil {
-		out.Done(fmt.Sprintf("Done! cd to %s and run `guark dev`.", dest))
+		out.Done(fmt.Sprintf("Done! cd to %s and run `guark run`.", dest))
 	}
 
 	return
@@ -170,7 +170,11 @@ func confirmAndRunSetupCommands(out *utils.Output, s SetupCommands, dest string)
 	fmt.Println("⏺ Setup commands (Verify them before confirm):")
 
 	for _, v := range s.Commands {
-		fmt.Println(fmt.Sprintf(`  - "%s" (dir: %s)`, v.Cmd, v.Dir))
+		ln := `  - "%s"`
+		if v.Dir != "" {
+			ln += "(dir: %s)"
+		}
+		fmt.Println(fmt.Sprintf(ln, v.Cmd, v.Dir))
 	}
 
 	prompt := promptui.Prompt{
