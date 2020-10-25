@@ -103,7 +103,7 @@ func serve(pkg string, port string) (*exec.Cmd, context.CancelFunc) {
 func start(port string, out *Output) error {
 
 	cmd := exec.Command("go", "run", "-tags", "dev", "app.go")
-	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_DEBUG_PORT=%s", port))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_DEV_PORT=%s", port))
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
