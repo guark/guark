@@ -15,6 +15,7 @@ import (
 )
 
 type WebviewEngine struct {
+	app     *app.App
 	quited  bool
 	server  *server.Server
 	webview webview.WebView
@@ -39,11 +40,10 @@ func (e WebviewEngine) Run() (err error) {
 	return
 }
 
-func (e WebviewEngine) Bind(name string, fn app.Func) error {
-	if err := e.webview.Bind(fmt.Sprintf("__guark_func_%s", name), fn); err != nil {
-		return err
-	}
-	return nil
+func (e *WebviewEngine) Bind(name string, fn app.Func) error {
+	return e.webview.Bind(fmt.Sprintf("__guark_func_%s", name), func(args map[string]interface{}) (interface{}, error) {
+		return fn(app.NewContext(e.app, args))
+	})
 }
 
 func (e *WebviewEngine) Quit() {
@@ -83,6 +83,7 @@ func New(a *app.App) app.Engine {
 	wv.Navigate(addr)
 
 	return &WebviewEngine{
+		app:     a,
 		server:  srv,
 		webview: wv,
 	}

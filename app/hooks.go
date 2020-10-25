@@ -7,7 +7,7 @@ import "fmt"
 
 type (
 	// hook func.
-	Hook func(*App)
+	Hook func(*App) error
 
 	// App hooks.
 	Hooks map[string]Hook
@@ -16,8 +16,7 @@ type (
 // Run a hook.
 func (h Hooks) Run(n string, a *App) error {
 	if fn, ok := h[n]; ok {
-		fn(a)
-		return nil
+		return fn(a)
 	}
 
 	return fmt.Errorf("could not find hook: %s", n)
