@@ -69,7 +69,7 @@ func New(a *app.App) app.Engine {
 
 	if a.IsDev() {
 
-		addr = fmt.Sprintf("http://127.0.0.1:%s", os.Getenv("GUARK_DEBUG_PORT"))
+		addr = fmt.Sprintf("http://127.0.0.1:%s", os.Getenv("GUARK_DEV_PORT"))
 
 	} else {
 
