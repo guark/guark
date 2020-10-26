@@ -22,7 +22,7 @@ type WindowsBuilder struct {
 
 func (b WindowsBuilder) Before() error {
 
-	b.Build.Log.Update("Building for widnows...")
+	b.Build.Log.Update("Building Windows App...")
 	return nil
 }
 
@@ -58,7 +58,7 @@ func (b WindowsBuilder) Run() error {
 		return err
 	}
 
-	b.Build.Log.Done("WindowsBuilder done 🙉")
+	b.Build.Log.Done("Build Windows App 🗔")
 	return nil
 }
 

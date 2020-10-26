@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
+	// "strings"
 
 	"github.com/guark/guark/cmd/guark/builders"
 	. "github.com/guark/guark/cmd/guark/utils"
@@ -42,12 +42,14 @@ var (
 			Name:  "rm",
 			Usage: "Remove dest path if exists.",
 		},
+		&cli.BoolFlag{
+			Name:  "keep-tmp",
+			Usage: "Remove dest path if exists.",
+		},
 	}
 )
 
 func before(b *builders.Build) (err error) {
-
-	b.Log.Done(fmt.Sprintf("Build for: %s started", strings.Join(b.Targets, ", ")))
 
 	// Unmarshal guark file.
 	if err = utils.UnmarshalGuarkFile(".", &b.Info); err != nil {
@@ -107,7 +109,7 @@ func before(b *builders.Build) (err error) {
 		}
 	}
 
-	b.Log.Done("Guark build initialized ⚙️")
+	b.Log.Done("Build Initialized 🔨")
 	return
 }
 
@@ -123,23 +125,20 @@ func build(b *builders.Build) (err error) {
 	return nil
 }
 
-func cleanup(b *builders.Build) {
-
-	if b.Temp != "" {
-		os.RemoveAll(b.Temp)
-	}
-}
-
 func Build(c *cli.Context) (err error) {
 
 	b := &builders.Build{
-		Log:         NewWriter(),
-		Dest:        c.String("dest"),
-		Clean:       c.Bool("rm"),
-		Targets:     c.StringSlice("target"),
-		BeforeFunc:  before,
-		RunFunc:     build,
-		CleanupFunc: cleanup,
+		Log:        NewWriter(),
+		Dest:       c.String("dest"),
+		Clean:      c.Bool("rm"),
+		Targets:    c.StringSlice("target"),
+		BeforeFunc: before,
+		RunFunc:    build,
+		CleanupFunc: func(b *builders.Build) {
+			if b.Temp != "" && !c.Bool("keep-tmp") {
+				os.RemoveAll(b.Temp)
+			}
+		},
 	}
 
 	b.Builders = []builders.Builder{

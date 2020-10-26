@@ -23,7 +23,7 @@ type EmbedBuilder struct {
 
 func (b EmbedBuilder) Before() error {
 
-	b.Build.Log.Update("EmbedBuilder...")
+	b.Build.Log.Update("Building Embeded Files...")
 	return nil
 }
 
@@ -49,11 +49,11 @@ func (b EmbedBuilder) Run() error {
 		return err
 	}
 
-	if err = embed.GenerateEmbed(files, utils.Path("lib", "embed.go"), "lib", b.Build.Temp); err != nil {
+	if err = embed.GenerateEmbed(files, utils.Path("lib", "embed.go"), "lib", filepath.Join(b.Build.Temp, "ui")); err != nil {
 		return err
 	}
 
-	b.Build.Log.Done("EmbedBuilder done 🙉")
+	b.Build.Log.Done("Build Embeded Files 🗃️")
 	return nil
 }
 

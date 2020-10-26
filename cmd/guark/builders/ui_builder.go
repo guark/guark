@@ -23,7 +23,7 @@ type UIBuilder struct {
 
 func (b UIBuilder) Before() error {
 
-	b.Build.Log.Update("Building app ui...")
+	b.Build.Log.Update("Building App UI...")
 	return nil
 }
 
@@ -41,7 +41,7 @@ func (b UIBuilder) Run() error {
 		return err
 	}
 
-	b.Build.Log.Done("UIBuilder done 🙈")
+	b.Build.Log.Done("Build App UI 🎨")
 	return nil
 }
 

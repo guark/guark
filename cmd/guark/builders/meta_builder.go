@@ -22,7 +22,7 @@ type MetaBuilder struct {
 
 func (b MetaBuilder) Before() error {
 
-	b.Build.Log.Update("Building meta files...")
+	b.Build.Log.Update("Building Meta Files...")
 	return nil
 }
 
@@ -38,7 +38,7 @@ func (b MetaBuilder) Run() (err error) {
 		}
 	}
 
-	b.Build.Log.Done("MetaBuilder done 🙉")
+	b.Build.Log.Done("Build Meta Files ℹ️")
 	return nil
 }
 
