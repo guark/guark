@@ -10,6 +10,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/otiai10/copy"
 	"github.com/guark/guark/cmd/guark/utils"
 )
 
@@ -38,7 +39,7 @@ func (b MetaBuilder) Run() (err error) {
 		}
 	}
 
-	b.Build.Log.Done("Build Meta Files ℹ️")
+	b.Build.Log.Done("Build Meta Files    ℹ️")
 	return nil
 }
 
@@ -67,25 +68,34 @@ func meta(b MetaBuilder, osbuild string, dest string) error {
 		metaFile := filepath.Join(metaFilesDest, strings.Replace(filepath.Base(path), "_id_", b.Build.Info.ID, -1))
 
 		f, err := utils.Create(metaFile, 0754)
-
 		if err != nil {
 			return err
 		}
-
 		defer f.Close()
 
-		fc, err := ioutil.ReadFile(path)
-
-		if err != nil {
-			return err
-		}
-
-		tmpl, err := template.New("meta").Parse(string(fc))
-
-		if err != nil {
-			return err
-		}
-
-		return tmpl.Execute(f, b.Build.Info)
+		return writeMetafile(b.Build, f, path)
 	})
 }
+
+func writeMetafile(b *Build, f *os.File, name string) error {
+
+	fc, err := ioutil.ReadFile(name)
+
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("meta").Parse(string(fc))
+
+	if err != nil {
+		return err
+	}
+
+	return tmpl.Execute(f, b.Info)
+}
+
+
+func copyStaticFiles(dest, osName string) error {
+	return copy.Copy(filepath.Join("res", "static"), filepath.Join(dest, osName));
+}
+

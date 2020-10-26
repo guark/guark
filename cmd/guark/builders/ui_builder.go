@@ -41,7 +41,7 @@ func (b UIBuilder) Run() error {
 		return err
 	}
 
-	b.Build.Log.Done("Build App UI 🎨")
+	b.Build.Log.Done("Build App UI        🎨")
 	return nil
 }
 

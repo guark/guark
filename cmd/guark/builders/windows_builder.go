@@ -8,9 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"image/png"
 
-	"github.com/otiai10/copy"
-	"github.com/zserge/webview"
+	"github.com/akavel/rsrc/rsrc"
+	"github.com/webview/webview"
+	"github.com/Kodeworks/golang-image-ico"
 )
 
 // Windows app builder.
@@ -23,7 +25,19 @@ type WindowsBuilder struct {
 func (b WindowsBuilder) Before() error {
 
 	b.Build.Log.Update("Building Windows App...")
-	return nil
+
+	if err := buildIcon(filepath.Join(b.Build.Temp, "app.ico")); err != nil {
+		return err
+	} else if err := buildManifest(b.Build, filepath.Join(b.Build.Temp, "app.manifest")); err != nil {
+		return err
+	}
+
+	arch := os.Getenv("GOARCH")
+	if arch == "" {
+		arch = "amd64"
+	}
+
+	return rsrc.Embed("guark.syso", arch, filepath.Join(b.Build.Temp, "app.manifest"), filepath.Join(b.Build.Temp, "app.ico"))
 }
 
 // Build and compile windows app.
@@ -54,16 +68,48 @@ func (b WindowsBuilder) Run() error {
 		return err
 	}
 
-	if err := copy.Copy(getDlls(), filepath.Join(b.Build.Dest, "windows")); err != nil {
+	if err := copyStaticFiles(b.Build.Dest, "windows"); err != nil {
 		return err
 	}
 
-	b.Build.Log.Done("Build Windows App 🗔")
+	b.Build.Log.Done("Build Windows App   🗔")
 	return nil
 }
 
 func (b WindowsBuilder) Cleanup() {
+	os.Remove("guark.syso")
+}
 
+func buildIcon(name string) error {
+
+	f, err := os.Open(filepath.Join("res", "icon.png"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	icon, err :=  png.Decode(f)
+	if err != nil {
+		return err
+	}
+
+	i, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+	defer i.Close()
+
+	return ico.Encode(i, icon)
+}
+
+func buildManifest(b *Build, name string) error {
+
+	f, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+
+	return writeMetafile(b, f, "windows.manifest")
 }
 
 // Get windows dlls path.
