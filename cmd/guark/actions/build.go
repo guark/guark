@@ -109,7 +109,7 @@ func before(b *builders.Build) (err error) {
 		}
 	}
 
-	b.Log.Done("Build Initialized 🔨")
+	b.Log.Done("Build Initialized   🔨")
 	return
 }
 
