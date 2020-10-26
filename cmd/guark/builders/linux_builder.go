@@ -20,7 +20,7 @@ type LinuxBuilder struct {
 
 func (b LinuxBuilder) Before() error {
 
-	b.Build.Log.Update("Building for linux...")
+	b.Build.Log.Update("Building Gnu/Linux App...")
 	return nil
 }
 
@@ -52,7 +52,7 @@ func (b LinuxBuilder) Run() error {
 		return err
 	}
 
-	b.Build.Log.Done("LinuxBuilder done 🙉")
+	b.Build.Log.Done("Build Gnu/Linux App 🐧")
 	return nil
 }
 
