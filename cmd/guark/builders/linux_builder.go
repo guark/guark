@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	// "github.com/otiai10/copy"
 )
 
 // Linux app builder.
@@ -49,6 +48,10 @@ func (b LinuxBuilder) Run() error {
 	}
 
 	if err := gobuild(flags, env); err != nil {
+		return err
+	}
+
+	if err := copyStaticFiles(b.Build.Dest, "linux"); err != nil {
 		return err
 	}
 
