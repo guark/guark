@@ -98,13 +98,13 @@ func Generate(files []string, root string, tmpl string) ([]byte, error) {
 }
 
 // Convert bytes to embedable string code.
-func stringify(bytes []byte) string {
+func stringify(bs []byte) string {
 
-	var parts []string
+	var b []string
 
-	for _, v := range bytes {
-		parts = append(parts, fmt.Sprintf("%d", int(v)))
+	for _, v := range bs {
+		b = append(b, fmt.Sprintf("%d", int(v)))
 	}
 
-	return fmt.Sprintf("[]byte{%s}", strings.Join(parts, ","))
+	return fmt.Sprintf("[]byte{%s}", strings.Join(b, ","))
 }
