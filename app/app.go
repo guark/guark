@@ -10,6 +10,7 @@ import (
 
 	"github.com/guark/guark/log"
 	"github.com/guark/guark/platform"
+	"gopkg.in/yaml.v2"
 )
 
 // App!
@@ -40,8 +41,6 @@ type App struct {
 	// App log level.
 	LogLevel string `yaml:"logLevel"`
 
-	EngineName string `yaml:"engine"`
-
 	// App log.
 	Log log.Log
 
@@ -55,7 +54,12 @@ type App struct {
 	// App plugins.
 	Plugins Plugins
 
-	Engine Engine
+	EngineConfig struct {
+		Name    string                 `yaml:"name"`
+		Options map[string]interface{} `yaml:"options"`
+	} `yaml:"engine"`
+
+	backend Engine
 }
 
 // Check if app running in dev mode.
@@ -63,27 +67,37 @@ func (a App) IsDev() bool {
 	return APP_MODE == "dev"
 }
 
-func (a App) Run() error {
-
-	if err := a.init(); err != nil {
-		return err
-	}
-
-	return a.Engine.Run()
+func (a *App) Run() error {
+	return a.backend.Run()
 }
 
 func (a App) Quit() {
-	a.Engine.Quit()
+	a.backend.Quit()
+}
+
+func (a *App) Use(eng Engine) error {
+
+	a.backend = eng
+
+	cfg, err := a.Embed.Data("guark.yaml")
+	if err != nil {
+		return err
+	}
+	if err = yaml.Unmarshal(*cfg, a); err != nil {
+		return err
+	}
+
+	return a.init()
 }
 
 func (a *App) init() error {
 
-	a.Engine.Bind("exit", func(c Context) (interface{}, error) {
+	a.backend.Bind("exit", func(c Context) (interface{}, error) {
 		a.Quit()
 		return nil, nil
 	})
 
-	a.Engine.Bind("hook", func(c Context) (interface{}, error) {
+	a.backend.Bind("hook", func(c Context) (interface{}, error) {
 
 		if !c.Has("name") {
 			return nil, fmt.Errorf("hook name required!")
@@ -94,15 +108,19 @@ func (a *App) init() error {
 
 	// Bind app functions.
 	for name, fn := range a.Funcs {
-		if err := a.Engine.Bind(name, fn); err != nil {
+		if err := a.backend.Bind(name, fn); err != nil {
 			return err
 		}
 	}
 
 	// Bind plugin functions.
 	for id, plugin := range a.Plugins {
+
+		// Init the plugin.
+		plugin.Init(*a)
+
 		for name, fn := range plugin.GetFuncs() {
-			if err := a.Engine.Bind(fmt.Sprintf("%s$%s", id, name), fn); err != nil {
+			if err := a.backend.Bind(fmt.Sprintf("%s$%s", id, name), fn); err != nil {
 				return err
 			}
 		}
