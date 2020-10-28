@@ -10,8 +10,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/otiai10/copy"
 	"github.com/guark/guark/cmd/guark/utils"
+	"github.com/otiai10/copy"
 )
 
 // Meta files builder.
@@ -94,8 +94,6 @@ func writeMetafile(b *Build, f *os.File, name string) error {
 	return tmpl.Execute(f, b.Info)
 }
 
-
 func copyStaticFiles(dest, osName string) error {
-	return copy.Copy(filepath.Join("res", "static"), filepath.Join(dest, osName));
+	return copy.Copy(filepath.Join("res", "static"), filepath.Join(dest, osName))
 }
-

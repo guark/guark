@@ -5,14 +5,14 @@ package builders
 
 import (
 	"fmt"
+	"image/png"
 	"os"
 	"path/filepath"
 	"reflect"
-	"image/png"
 
+	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/akavel/rsrc/rsrc"
 	"github.com/webview/webview"
-	"github.com/Kodeworks/golang-image-ico"
 )
 
 // Windows app builder.
@@ -88,7 +88,7 @@ func buildIcon(name string) error {
 	}
 	defer f.Close()
 
-	icon, err :=  png.Decode(f)
+	icon, err := png.Decode(f)
 	if err != nil {
 		return err
 	}
