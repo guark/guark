@@ -16,6 +16,7 @@ import (
 
 type WebviewEngine struct {
 	app     *app.App
+	addr    string
 	quited  bool
 	server  *server.Server
 	webview webview.WebView
@@ -34,6 +35,13 @@ func (e WebviewEngine) Run() (err error) {
 			}()
 		}
 
+		e.webview.SetSize(
+			intVal(e.app.EngineConfig.Options["window_width"], 900),
+			intVal(e.app.EngineConfig.Options["window_height"], 700),
+			hint(e.app.EngineConfig.Options["window_hint"]),
+		)
+		e.webview.SetTitle(e.app.Name)
+		e.webview.Navigate(e.addr)
 		e.webview.Run()
 	}()
 
@@ -77,14 +85,30 @@ func New(a *app.App) app.Engine {
 		addr = srv.Addr()
 	}
 
-	wv := webview.New(a.IsDev())
-	wv.SetTitle(a.Name)
-	wv.SetSize(1000, 700, webview.Hint(a.Window.Hint))
-	wv.Navigate(addr)
-
 	return &WebviewEngine{
 		app:     a,
+		addr:    addr,
 		server:  srv,
-		webview: wv,
+		webview: webview.New(a.IsDev()),
 	}
+}
+
+func hint(h interface{}) webview.Hint {
+
+	var hv string
+
+	if h != nil {
+		hv = h.(string)
+	}
+
+	switch hv {
+	case "min":
+		return webview.HintMin
+	case "max":
+		return webview.HintMax
+	case "fix":
+		return webview.HintFixed
+	}
+
+	return webview.HintNone
 }
