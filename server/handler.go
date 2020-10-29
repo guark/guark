@@ -4,9 +4,6 @@
 package server
 
 import (
-	"bytes"
-	"compress/gzip"
-	"io"
 	"mime"
 	"net/http"
 	"path/filepath"
@@ -31,28 +28,25 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", mt)
 	}
 
-	gz, e := h.embed.Data(r.URL.Path)
-
-	if e != nil {
-		w.Write([]byte(e.Error()))
-		return
-	}
-
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 
 		w.Header().Set("Content-Encoding", "gzip")
+
+		gz, e := h.embed.Data(r.URL.Path)
+		if e != nil {
+			w.Write([]byte(e.Error()))
+			return
+		}
+
 		w.Write(*gz)
 		return
 	}
 
-	reader, e := gzip.NewReader(bytes.NewReader(*gz))
-
+	data, e := h.embed.UngzipData(r.URL.Path)
 	if e != nil {
 		w.Write([]byte(e.Error()))
 		return
 	}
 
-	if _, err := io.Copy(w, reader); err != nil {
-		h.log.Error(err)
-	}
+	w.Write(data)
 }
