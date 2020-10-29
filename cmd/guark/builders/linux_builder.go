@@ -47,7 +47,7 @@ func (b LinuxBuilder) Run() error {
 		env = append(env, fmt.Sprintf("CXX=%s", b.Build.Config.Linux.CXX))
 	}
 
-	if err := gobuild(flags, env); err != nil {
+	if err := gobuild(flags, b.Build.Info.EngineName, env); err != nil {
 		return err
 	}
 
@@ -63,9 +63,9 @@ func (b LinuxBuilder) Cleanup() {
 
 }
 
-func gobuild(flags []string, env []string) error {
+func gobuild(flags []string, engine string, env []string) error {
 
-	cmd := exec.Command("go", append([]string{"build"}, flags...)...)
+	cmd := exec.Command("go", append([]string{"build", "-tags", engine}, flags...)...)
 	cmd.Env = append(os.Environ(), env...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

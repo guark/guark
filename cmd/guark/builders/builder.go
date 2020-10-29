@@ -28,6 +28,7 @@ type Build struct {
 		Name             string `yaml:"name"`
 		License          string `yaml:"license"`
 		LogLevel         string `yaml:"logLevel"`
+		EngineName       string `yaml:"engineName"`
 	}
 
 	// Build Config

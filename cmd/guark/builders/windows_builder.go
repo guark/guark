@@ -64,7 +64,7 @@ func (b WindowsBuilder) Run() error {
 		env = append(env, fmt.Sprintf("CXX=%s", b.Build.Config.Windows.CXX))
 	}
 
-	if err := gobuild(flags, env); err != nil {
+	if err := gobuild(flags, b.Build.Info.EngineName, env); err != nil {
 		return err
 	}
 

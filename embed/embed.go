@@ -5,6 +5,7 @@ package embed
 
 import (
 	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -46,10 +47,15 @@ func (e Embed) Build(files []string) ([]byte, error) {
 			return nil, err
 		}
 
+		var gzdata bytes.Buffer
+		w := gzip.NewWriter(&gzdata)
+		w.Write(data)
+		w.Close()
+
 		embeds = append(embeds, &Item{
 			ID:   strings.Replace(files[i], e.Root, "", 1),
 			Path: files[i],
-			Data: data,
+			Data: gzdata.Bytes(),
 		})
 	}
 

@@ -76,11 +76,11 @@ func (a *App) Use(eng Engine) error {
 
 	a.backend = eng
 
-	cfg, err := a.Embed.Data("guark.yaml")
+	cfg, err := a.Embed.UngzipData("guark.yaml")
 	if err != nil {
 		return err
 	}
-	if err = yaml.Unmarshal(*cfg, a); err != nil {
+	if err = yaml.Unmarshal(cfg, a); err != nil {
 		return err
 	}
 
@@ -101,6 +101,15 @@ func (a *App) init() error {
 		}
 
 		return nil, a.Hooks.Run(c.Get("name").(string), a)
+	})
+
+	a.backend.Bind("env", func(c Context) (interface{}, error) {
+		return map[string]interface{}{
+			"app_id":      a.ID,
+			"app_name":    a.Name,
+			"dev_mode":    a.IsDev(),
+			"app_version": a.Version,
+		}, nil
 	})
 
 	// Bind app functions.
