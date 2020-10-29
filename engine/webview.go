@@ -1,7 +1,7 @@
 // Copyright 2020 Mohammed El Bahja. All rights reserved.
 // Use of this source code is governed by a MIT license.
 //
-// +build webview !chrome !hybrid
+// +build webview
 
 package engine
 
@@ -36,9 +36,9 @@ func (e WebviewEngine) Run() (err error) {
 		}
 
 		e.webview.SetSize(
-			intVal(e.app.EngineConfig.Options["window_width"], 900),
-			intVal(e.app.EngineConfig.Options["window_height"], 700),
-			hint(e.app.EngineConfig.Options["window_hint"]),
+			intVal(e.app.EngineConfig["window_width"], 900),
+			intVal(e.app.EngineConfig["window_height"], 700),
+			hint(e.app.EngineConfig["window_hint"]),
 		)
 		e.webview.SetTitle(e.app.Name)
 		e.webview.Navigate(e.addr)
