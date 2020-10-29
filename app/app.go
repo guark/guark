@@ -11,6 +11,7 @@ import (
 	"github.com/guark/guark/log"
 	"github.com/guark/guark/platform"
 	"gopkg.in/yaml.v2"
+	"github.com/adrg/xdg"
 )
 
 // App!
@@ -54,7 +55,7 @@ type App struct {
 	// App plugins.
 	Plugins Plugins
 
-	EngineConfig map[string]interface{} `yaml:"engine"`
+	EngineConfig map[string]interface{} `yaml:"engineConfig"`
 
 	backend Engine
 }
@@ -87,7 +88,24 @@ func (a *App) Use(eng Engine) error {
 	return a.init()
 }
 
+
+func (a App) DataFile(name string) (string, error) {
+	return xdg.DataFile(filepath.Join(a.ID, name))
+}
+
+func (a App) CacheFile(name string) (string, error) {
+	return xdg.CacheFile(filepath.Join(a.ID, name))
+}
+
+func (a App) ConfigFile(name string) (string, error) {
+	return xdg.ConfigFile(filepath.Join(a.ID, name))
+}
+
 func (a *App) init() error {
+
+	if err := a.backend.Init(); err != nil {
+		return err
+	}
 
 	a.backend.Bind("exit", func(c Context) (interface{}, error) {
 		a.Quit()
