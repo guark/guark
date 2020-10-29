@@ -1,7 +1,7 @@
 // Copyright 2020 Mohammed El Bahja. All rights reserved.
 // Use of this source code is governed by a MIT license.
 //
-// +build webview
+// +build webview hybrid
 
 package engine
 
@@ -71,8 +71,7 @@ func (e *WebviewEngine) Quit() {
 	}
 }
 
-func New(a *app.App) app.Engine {
-
+func newWebview(a *app.App) app.Engine {
 	srv, addr := newServer(a)
 
 	return &WebviewEngine{

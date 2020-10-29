@@ -14,7 +14,7 @@ import (
 )
 
 type Handler struct {
-	log   log.Log
+	log   log.Logger
 	embed *app.Embed
 }
 

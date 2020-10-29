@@ -32,18 +32,11 @@ type App struct {
 	// App license.
 	License string `yaml:"license"`
 
-	// App window state.
-	Window struct {
-		Width  int
-		Height int
-		Hint   int
-	} `yaml:"window"`
-
 	// App log level.
 	LogLevel string `yaml:"logLevel"`
 
 	// App log.
-	Log log.Log
+	Log log.Logger
 
 	// App embeds
 	Embed *Embed
@@ -57,7 +50,7 @@ type App struct {
 
 	EngineConfig map[string]interface{} `yaml:"engineConfig"`
 
-	backend Engine
+	engine Engine
 }
 
 // Check if app running in dev mode.
@@ -66,16 +59,12 @@ func (a App) IsDev() bool {
 }
 
 func (a *App) Run() error {
-	return a.backend.Run()
+	return a.engine.Run()
 }
 
-func (a App) Quit() {
-	a.backend.Quit()
-}
+func (a *App) Use(engine Engine) error {
 
-func (a *App) Use(eng Engine) error {
-
-	a.backend = eng
+	a.engine = engine
 
 	cfg, err := a.Embed.UngzipData("guark.yaml")
 	if err != nil {
@@ -84,6 +73,8 @@ func (a *App) Use(eng Engine) error {
 	if err = yaml.Unmarshal(cfg, a); err != nil {
 		return err
 	}
+
+	a.Log.SetLevel(a.LogLevel)
 
 	return a.init()
 }
@@ -98,58 +89,6 @@ func (a App) CacheFile(name string) (string, error) {
 
 func (a App) ConfigFile(name string) (string, error) {
 	return xdg.ConfigFile(filepath.Join(a.ID, name))
-}
-
-func (a *App) init() error {
-
-	if err := a.backend.Init(); err != nil {
-		return err
-	}
-
-	a.backend.Bind("exit", func(c Context) (interface{}, error) {
-		a.Quit()
-		return nil, nil
-	})
-
-	a.backend.Bind("hook", func(c Context) (interface{}, error) {
-
-		if !c.Has("name") {
-			return nil, fmt.Errorf("hook name required!")
-		}
-
-		return nil, a.Hooks.Run(c.Get("name").(string), a)
-	})
-
-	a.backend.Bind("env", func(c Context) (interface{}, error) {
-		return map[string]interface{}{
-			"app_id":      a.ID,
-			"app_name":    a.Name,
-			"dev_mode":    a.IsDev(),
-			"app_version": a.Version,
-		}, nil
-	})
-
-	// Bind app functions.
-	for name, fn := range a.Funcs {
-		if err := a.backend.Bind(name, fn); err != nil {
-			return err
-		}
-	}
-
-	// Bind plugin functions.
-	for id, plugin := range a.Plugins {
-
-		// Init the plugin.
-		plugin.Init(*a)
-
-		for name, fn := range plugin.GetFuncs() {
-			if err := a.backend.Bind(fmt.Sprintf("%s$%s", id, name), fn); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 // Get file path from appdata dir.
@@ -167,4 +106,60 @@ func (a App) Path(elem ...string) string {
 	}
 
 	return filepath.Join(append([]string{platform.DATA_DIR, a.ID}, elem...)...)
+}
+
+func (a App) Quit() {
+	a.engine.Quit()
+}
+
+func (a *App) init() error {
+
+	if err := a.engine.Init(); err != nil {
+		return err
+	}
+
+	a.engine.Bind("exit", func(c Context) (interface{}, error) {
+		a.Quit()
+		return nil, nil
+	})
+
+	a.engine.Bind("hook", func(c Context) (interface{}, error) {
+
+		if !c.Has("name") {
+			return nil, fmt.Errorf("hook name required!")
+		}
+
+		return nil, a.Hooks.Run(c.Get("name").(string), a)
+	})
+
+	a.engine.Bind("env", func(c Context) (interface{}, error) {
+		return map[string]interface{}{
+			"app_id":      a.ID,
+			"app_name":    a.Name,
+			"dev_mode":    a.IsDev(),
+			"app_version": a.Version,
+		}, nil
+	})
+
+	// Bind app functions.
+	for name, fn := range a.Funcs {
+		if err := a.engine.Bind(name, fn); err != nil {
+			return err
+		}
+	}
+
+	// Bind plugin functions.
+	for id, plugin := range a.Plugins {
+
+		// Init the plugin.
+		plugin.Init(*a)
+
+		for name, fn := range plugin.GetFuncs() {
+			if err := a.engine.Bind(fmt.Sprintf("%s$%s", id, name), fn); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
