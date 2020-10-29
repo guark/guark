@@ -4,7 +4,10 @@
 package app
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
+	"io/ioutil"
 )
 
 // Embed struct
@@ -18,12 +21,26 @@ type Embed struct {
 func (e Embed) Data(name string) (b *[]byte, err error) {
 
 	b, ok := e.Files[name]
-
-	if ok == false {
+	if !ok {
 		err = fmt.Errorf("could not find: %s", name)
 	}
 
 	return
+}
+
+func (e Embed) UngzipData(name string) ([]byte, error) {
+
+	b, err := e.Data(name)
+	if err != nil {
+		return nil, err
+	}
+
+	reader, err := gzip.NewReader(bytes.NewReader(*b))
+	if err != nil {
+		return nil, err
+	}
+
+	return ioutil.ReadAll(reader)
 }
 
 // Delete from embeds
