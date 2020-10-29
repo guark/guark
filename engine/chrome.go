@@ -21,6 +21,22 @@ type ChromeEngine struct {
 	ui     lorca.UI
 }
 
+func (e *ChromeEngine) Init() error {
+
+	profile, err := e.app.DataFile("_profile")
+	if err != nil {
+		return err
+	}
+
+	e.ui, err = lorca.New(
+		"",
+		profile,
+		intVal(e.app.EngineConfig["window_width"], 900),
+		intVal(e.app.EngineConfig["window_height"], 700),
+	)
+	return err
+}
+
 func (e ChromeEngine) Run() (err error) {
 
 	func() {
@@ -59,24 +75,6 @@ func (e *ChromeEngine) Quit() {
 	if e.server != nil {
 		e.server.Close()
 	}
-}
-
-func (e *ChromeEngine) Init() error {
-
-	profile, err := e.app.DataFile("_profile")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(e.app.EngineConfig["window_width"])
-
-	e.ui, err = lorca.New(
-		"",
-		profile,
-		intVal(e.app.EngineConfig["window_width"], 900),
-		intVal(e.app.EngineConfig["window_height"], 700),
-	)
-	return err
 }
 
 func New(a *app.App) app.Engine {

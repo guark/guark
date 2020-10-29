@@ -22,9 +22,6 @@ type WebviewEngine struct {
 }
 
 func (e *WebviewEngine) Init() error {
-
-	fmt.Println(e.app.EngineConfig["window_width"])
-
 	e.webview.SetTitle(e.app.Name)
 	e.webview.SetSize(
 		intVal(e.app.EngineConfig["window_width"], 900),
