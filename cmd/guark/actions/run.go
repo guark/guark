@@ -28,6 +28,10 @@ var (
 	}
 )
 
+type EngineConfig struct {
+	Name string `yaml:"engineName"`
+}
+
 func Dev(c *cli.Context) error {
 
 	var (
@@ -101,8 +105,9 @@ func serve(pkg string, port string) (*exec.Cmd, context.CancelFunc) {
 }
 
 func start(port string, out *Output) error {
-
-	cmd := exec.Command("go", "run", "-tags", "dev", "app.go")
+	cfg := new(EngineConfig)
+	utils.UnmarshalGuarkFile("", &cfg)
+	cmd := exec.Command("go", "run", "-tags", fmt.Sprintf("dev %s", cfg.Name), "app.go")
 	cmd.Env = append(os.Environ(), fmt.Sprintf("GUARK_DEV_PORT=%s", port))
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

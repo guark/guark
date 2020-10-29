@@ -54,10 +54,7 @@ type App struct {
 	// App plugins.
 	Plugins Plugins
 
-	EngineConfig struct {
-		Name    string                 `yaml:"name"`
-		Options map[string]interface{} `yaml:"options"`
-	} `yaml:"engine"`
+	EngineConfig map[string]interface{} `yaml:"engine"`
 
 	backend Engine
 }
