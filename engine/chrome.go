@@ -7,7 +7,6 @@ package engine
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/guark/guark/app"
 	"github.com/guark/guark/server"
@@ -62,30 +61,29 @@ func (e *ChromeEngine) Quit() {
 	}
 }
 
+func (e *ChromeEngine) Init() error {
+
+	profile, err := e.app.DataFile("_profile")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(e.app.EngineConfig["window_width"])
+
+	e.ui, err = lorca.New(
+		"",
+		profile,
+		intVal(e.app.EngineConfig["window_width"], 900),
+		intVal(e.app.EngineConfig["window_height"], 700),
+	)
+	return err
+}
+
 func New(a *app.App) app.Engine {
 
-	var (
-		srv  *server.Server
-		addr string
-	)
-
-	if a.IsDev() {
-
-		addr = fmt.Sprintf("http://127.0.0.1:%s", os.Getenv("GUARK_DEV_PORT"))
-
-	} else {
-
-		srv = server.New(a)
-		addr = srv.Addr()
-	}
-
-	ui, err := lorca.New("", "/tmp/profilss", 900, 700)
-	if err != nil {
-		panic(err)
-	}
+	srv, addr := newServer(a)
 
 	return &ChromeEngine{
-		ui:     ui,
 		app:    a,
 		addr:   addr,
 		server: srv,
