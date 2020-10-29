@@ -6,7 +6,7 @@
     <p>Guark allows you to build beautiful user interfaces using modern web technologies such as Vue.js, React.js..., while your app logic handled and powered by the amazing <b>Go</b>.</p>
 </div>
 
-![Guark Framework7 Demo App](https://github.com/guark/guark/raw/master/demo.png)
+![Guark Vue Template](https://i.imgur.com/RhU6bh7.png)
 
 <p align="center">
     <a href="#installation">Installation</a> ❘
