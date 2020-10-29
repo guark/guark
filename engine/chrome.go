@@ -14,7 +14,7 @@ import (
 	"github.com/zserge/lorca"
 )
 
-type WebviewEngine struct {
+type ChromeEngine struct {
 	app    *app.App
 	addr   string
 	quited bool
@@ -22,7 +22,7 @@ type WebviewEngine struct {
 	ui     lorca.UI
 }
 
-func (e WebviewEngine) Run() (err error) {
+func (e ChromeEngine) Run() (err error) {
 
 	func() {
 
@@ -30,7 +30,7 @@ func (e WebviewEngine) Run() (err error) {
 		if app.APP_MODE != "dev" {
 			defer func() {
 				if r := recover(); r != nil {
-					err = fmt.Errorf("WebviewEngine panic: %v", r)
+					err = fmt.Errorf("ChromeEngine panic: %v", r)
 				}
 			}()
 		}
@@ -42,13 +42,13 @@ func (e WebviewEngine) Run() (err error) {
 	return
 }
 
-func (e *WebviewEngine) Bind(name string, fn app.Func) error {
+func (e *ChromeEngine) Bind(name string, fn app.Func) error {
 	return e.ui.Bind(fmt.Sprintf("__guark_func_%s", name), func(args map[string]interface{}) (interface{}, error) {
 		return fn(app.NewContext(e.app, args))
 	})
 }
 
-func (e *WebviewEngine) Quit() {
+func (e *ChromeEngine) Quit() {
 
 	if e.quited {
 		return
@@ -84,7 +84,7 @@ func New(a *app.App) app.Engine {
 		panic(err)
 	}
 
-	return &WebviewEngine{
+	return &ChromeEngine{
 		ui:     ui,
 		app:    a,
 		addr:   addr,
