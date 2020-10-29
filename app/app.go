@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/adrg/xdg"
 	"github.com/guark/guark/log"
 	"github.com/guark/guark/platform"
 	"gopkg.in/yaml.v2"
-	"github.com/adrg/xdg"
 )
 
 // App!
@@ -87,7 +87,6 @@ func (a *App) Use(eng Engine) error {
 
 	return a.init()
 }
-
 
 func (a App) DataFile(name string) (string, error) {
 	return xdg.DataFile(filepath.Join(a.ID, name))
