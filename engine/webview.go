@@ -7,7 +7,6 @@ package engine
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/guark/guark/app"
 	"github.com/guark/guark/server"
@@ -20,6 +19,20 @@ type WebviewEngine struct {
 	quited  bool
 	server  *server.Server
 	webview webview.WebView
+}
+
+
+func (e *WebviewEngine) Init() error {
+
+	fmt.Println(e.app.EngineConfig["window_width"])
+
+	e.webview.SetTitle(e.app.Name)
+	e.webview.SetSize(
+		intVal(e.app.EngineConfig["window_width"], 900),
+		intVal(e.app.EngineConfig["window_height"], 700),
+		hint(e.app.EngineConfig["window_hint"]),
+	)
+	return nil
 }
 
 func (e WebviewEngine) Run() (err error) {
@@ -35,12 +48,6 @@ func (e WebviewEngine) Run() (err error) {
 			}()
 		}
 
-		e.webview.SetSize(
-			intVal(e.app.EngineConfig["window_width"], 900),
-			intVal(e.app.EngineConfig["window_height"], 700),
-			hint(e.app.EngineConfig["window_hint"]),
-		)
-		e.webview.SetTitle(e.app.Name)
 		e.webview.Navigate(e.addr)
 		e.webview.Run()
 	}()
@@ -70,20 +77,7 @@ func (e *WebviewEngine) Quit() {
 
 func New(a *app.App) app.Engine {
 
-	var (
-		srv  *server.Server
-		addr string
-	)
-
-	if a.IsDev() {
-
-		addr = fmt.Sprintf("http://127.0.0.1:%s", os.Getenv("GUARK_DEV_PORT"))
-
-	} else {
-
-		srv = server.New(a)
-		addr = srv.Addr()
-	}
+	srv, addr := newServer(a)
 
 	return &WebviewEngine{
 		app:     a,

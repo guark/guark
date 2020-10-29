@@ -4,6 +4,7 @@
 package app
 
 type Engine interface {
+	Init() error
 	Run() error
 	Bind(name string, fn Func) error
 	Quit()
