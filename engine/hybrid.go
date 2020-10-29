@@ -32,7 +32,7 @@ func (e HybridEngine) Quit() {
 
 func New(a *app.App) app.Engine {
 
-	if lorca.LocateChrome() == "" {
+	if lorca.LocateChrome() != "" {
 		return newChrome(a)
 	}
 
