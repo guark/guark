@@ -1,7 +1,7 @@
 // Copyright 2020 Mohammed El Bahja. All rights reserved.
 // Use of this source code is governed by a MIT license.
 //
-// +build chrome
+// +build chrome hybrid
 
 package engine
 
@@ -77,7 +77,7 @@ func (e *ChromeEngine) Quit() {
 	}
 }
 
-func New(a *app.App) app.Engine {
+func newChrome(a *app.App) app.Engine {
 
 	srv, addr := newServer(a)
 
