@@ -44,6 +44,7 @@ func (b WindowsBuilder) Before() error {
 func (b WindowsBuilder) Run() error {
 
 	var (
+		err   error
 		flags []string
 		env   []string = []string{"CGO_ENABLED=1", "GOOS=windows"}
 		dest  string   = filepath.Join(b.Build.Dest, "windows", fmt.Sprintf("%s.exe", b.Build.Info.ID))
@@ -64,15 +65,26 @@ func (b WindowsBuilder) Run() error {
 		env = append(env, fmt.Sprintf("CXX=%s", b.Build.Config.Windows.CXX))
 	}
 
-	if err := gobuild(flags, b.Build.Info.EngineName, env); err != nil {
+	if err = gobuild(flags, b.Build.Info.EngineName, env); err != nil {
 		return err
 	}
 
-	if err := copyStaticFiles(b.Build.Dest, "windows"); err != nil {
+	if err = copyStaticFiles(b.Build.Dest, "windows"); err != nil {
+		return err
+	}
+
+	bundlerConfig, err := os.Create("bundler.yaml")
+	if err != nil {
+		return err
+	}
+	defer bundlerConfig.Close()
+
+	if err = writeMetafile(b.Build, bundlerConfig, "guark-bundle.yaml"); err != nil {
 		return err
 	}
 
 	b.Build.Log.Done("Build Windows App   🗔")
+
 	return nil
 }
 
@@ -109,7 +121,7 @@ func buildManifest(b *Build, name string) error {
 		return err
 	}
 
-	return writeMetafile(b, f, "windows.manifest")
+	return writeMetafile(b, f, "app.manifest")
 }
 
 // Get windows dlls path.

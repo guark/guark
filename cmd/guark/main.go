@@ -29,6 +29,12 @@ func init() {
 				Action: actions.Build,
 			},
 			{
+				Name:  "bundle",
+				Usage: "Bundle guark app.",
+				Before: utils.CheckWorkingDir,
+				Action: actions.Bundle,
+			},
+			{
 				Name:   "run",
 				Usage:  "Start and run dev app.",
 				Flags:  actions.DevFlags,
