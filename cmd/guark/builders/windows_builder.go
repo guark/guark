@@ -8,11 +8,10 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
-	"reflect"
 
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/akavel/rsrc/rsrc"
-	"github.com/webview/webview"
+	"github.com/otiai10/copy"
 )
 
 // Windows app builder.
@@ -73,6 +72,10 @@ func (b WindowsBuilder) Run() error {
 		return err
 	}
 
+	if err = copyWindowsStaticLibFiles(b.Build, "windows"); err != nil {
+		return err
+	}
+
 	bundlerConfig, err := os.Create("bundler.yaml")
 	if err != nil {
 		return err
@@ -94,7 +97,7 @@ func (b WindowsBuilder) Cleanup() {
 
 func buildIcon(name string) error {
 
-	f, err := os.Open(filepath.Join("res", "icon.png"))
+	f, err := os.Open(filepath.Join("statics", "icon.png"))
 	if err != nil {
 		return err
 	}
@@ -124,28 +127,20 @@ func buildManifest(b *Build, name string) error {
 	return writeMetafile(b, f, "app.manifest")
 }
 
-// Get windows dlls path.
-func getDlls() string {
 
-	arch := "x86"
+func copyWindowsStaticLibFiles(b *Build, osName string) error {
 
-	if os.Getenv("GOARCH") == "amd64" {
-		arch = "x64"
+	files := []string{}
+
+	if b.Info.EngineName != "chrome" {
+		files = append(files, "WebView2Loader.dll", "webview.dll")
 	}
 
-	return filepath.Join(os.Getenv("GOPATH"), "src", pkgPath(webview.New(true)), "dll", arch)
-}
-
-// this function code was stolen from:
-// https://stackoverflow.com/a/60846213/5834438
-func pkgPath(v interface{}) string {
-	if v == nil {
-		return ""
+	for _, name := range files {
+		if err := copy.Copy(filepath.Join("resources", osName, name), filepath.Join(b.Dest, osName, name)); err != nil {
+			return err
+		}
 	}
 
-	val := reflect.ValueOf(v)
-	if val.Kind() == reflect.Ptr {
-		return val.Elem().Type().PkgPath()
-	}
-	return val.Type().PkgPath()
+	return nil
 }

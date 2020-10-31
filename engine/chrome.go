@@ -29,7 +29,7 @@ func (e *ChromeEngine) Init() error {
 	}
 
 	e.ui, err = lorca.New(
-		"",
+		fmt.Sprintf("data:text/html,<html><title>%s</title></html>", e.app.Name),
 		profile,
 		intVal(e.app.EngineConfig["window_width"], 900),
 		intVal(e.app.EngineConfig["window_height"], 700),
