@@ -52,7 +52,7 @@ func (b MetaBuilder) Cleanup() {
 // Replace "_id_" in path with App id.
 func meta(b MetaBuilder, osbuild string, dest string) error {
 
-	metaFilesDir := utils.Path("res", "meta", osbuild)
+	metaFilesDir := utils.Path("meta", osbuild)
 	metaFilesDest := filepath.Join(dest, osbuild)
 
 	if osbuild == "darwin" {
@@ -95,5 +95,5 @@ func writeMetafile(b *Build, f *os.File, name string) error {
 }
 
 func copyStaticFiles(dest, osName string) error {
-	return copy.Copy(filepath.Join("res", "static"), filepath.Join(dest, osName))
+	return copy.Copy(filepath.Join("statics"), filepath.Join(dest, osName, "statics"))
 }

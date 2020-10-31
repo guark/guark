@@ -18,18 +18,20 @@ type Builder interface {
 	Cleanup()
 }
 
+type GuarkConfig struct {
+	GuarkFileVersion string `yaml:"guark"`
+	Version          string `yaml:"version"` // App version
+	ID               string `yaml:"id"`
+	Name             string `yaml:"name"`
+	License          string `yaml:"license"`
+	LogLevel         string `yaml:"logLevel"`
+	EngineName       string `yaml:"engineName"`
+}
+
 type Build struct {
 
 	// App build info.
-	Info struct {
-		GuarkFileVersion string `yaml:"guark"`
-		Version          string `yaml:"version"` // App version
-		ID               string `yaml:"id"`
-		Name             string `yaml:"name"`
-		License          string `yaml:"license"`
-		LogLevel         string `yaml:"logLevel"`
-		EngineName       string `yaml:"engineName"`
-	}
+	Info GuarkConfig
 
 	// Build Config
 	Config struct {
