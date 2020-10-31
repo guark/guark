@@ -51,6 +51,8 @@ github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/Qd
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/melbahja/bundler v0.0.0-20201030212439-be2374738ce9 h1:s5M/AeIehnKIhuRmx8XyH4nbkaQPgDJBXtlVlv16t6Y=
 github.com/melbahja/bundler v0.0.0-20201030212439-be2374738ce9/go.mod h1:aqpBoQUJD4iie8hxFDL35+zCUbp6SpEK+PpkVmpaKx4=
+github.com/melbahja/bundler v0.0.0-20201031182403-1bab192954c6 h1:pS7RXRFAcH0Eubg5hMxhKnXsOMQg/kfVxhq98Qi/huc=
+github.com/melbahja/bundler v0.0.0-20201031182403-1bab192954c6/go.mod h1:aqpBoQUJD4iie8hxFDL35+zCUbp6SpEK+PpkVmpaKx4=
 github.com/otiai10/copy v1.2.0 h1:HvG945u96iNadPoG2/Ja2+AUJeW5YuFQMixq9yirC+k=
 github.com/otiai10/copy v1.2.0/go.mod h1:rrF5dJ5F0t/EWSYODDu4j9/vEeYHMkc8jt0zJChqQWw=
 github.com/otiai10/curr v0.0.0-20150429015615-9b4961190c95/go.mod h1:9qAhocn7zKJG+0mI8eUu6xqkFDYS2kb2saOteoSB3cE=
