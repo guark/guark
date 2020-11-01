@@ -25,7 +25,7 @@ func (b WindowsBuilder) Before() error {
 
 	b.Build.Log.Update("Building Windows App...")
 
-	if err := buildIcon(filepath.Join(b.Build.Temp, "app.ico")); err != nil {
+	if err := buildIco(filepath.Join(b.Build.Temp, "app.ico")); err != nil {
 		return err
 	} else if err := buildManifest(b.Build, filepath.Join(b.Build.Temp, "app.manifest")); err != nil {
 		return err
@@ -68,7 +68,7 @@ func (b WindowsBuilder) Run() error {
 		return err
 	}
 
-	if err = copyStaticFiles(b.Build.Dest, "windows"); err != nil {
+	if err = copyStaticFiles(filepath.Join(b.Build.Dest, "windows")); err != nil {
 		return err
 	}
 
@@ -95,7 +95,7 @@ func (b WindowsBuilder) Cleanup() {
 	os.Remove("guark.syso")
 }
 
-func buildIcon(name string) error {
+func buildIco(name string) error {
 
 	f, err := os.Open(filepath.Join("statics", "icon.png"))
 	if err != nil {
@@ -126,7 +126,6 @@ func buildManifest(b *Build, name string) error {
 
 	return writeMetafile(b, f, "app.manifest")
 }
-
 
 func copyWindowsStaticLibFiles(b *Build, osName string) error {
 
