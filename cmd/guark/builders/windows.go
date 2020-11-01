@@ -81,6 +81,7 @@ func (b WindowsBuilder) Run() error {
 		return err
 	}
 	defer bundlerConfig.Close()
+	bundlerConfig.WriteString("# Auto generated (DO NOT EDIT THIS, edit guark-bundle.yaml).\n\r")
 
 	if err = writeMetafile(b.Build, bundlerConfig, "guark-bundle.yaml"); err != nil {
 		return err
