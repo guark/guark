@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"runtime"
 
-	// "strings"
-
 	"github.com/guark/guark/cmd/guark/builders"
 	. "github.com/guark/guark/cmd/guark/utils"
 	"github.com/guark/guark/utils"
@@ -98,11 +96,11 @@ func before(b *builders.Build) (err error) {
 				Build: b,
 			})
 			break
-		// case "darwin":
-		// 	b.Builders = append(b.Builders, &builders.DarwinBuilder{
-		// 		Build: b,
-		// 	})
-		// 	break
+		case "darwin":
+			b.Builders = append(b.Builders, &builders.DarwinBuilder{
+				Build: b,
+			})
+			break
 		case "windows":
 			b.Builders = append(b.Builders, &builders.WindowsBuilder{
 				Build: b,

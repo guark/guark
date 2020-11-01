@@ -5,8 +5,6 @@ package builders
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -51,7 +49,7 @@ func (b LinuxBuilder) Run() error {
 		return err
 	}
 
-	if err := copyStaticFiles(b.Build.Dest, "linux"); err != nil {
+	if err := copyStaticFiles(filepath.Join(b.Build.Dest, "linux")); err != nil {
 		return err
 	}
 
@@ -61,13 +59,4 @@ func (b LinuxBuilder) Run() error {
 
 func (b LinuxBuilder) Cleanup() {
 
-}
-
-func gobuild(flags []string, engine string, env []string) error {
-
-	cmd := exec.Command("go", append([]string{"build", "-tags", engine}, flags...)...)
-	cmd.Env = append(os.Environ(), env...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }
