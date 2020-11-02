@@ -102,10 +102,10 @@ func (a App) Path(elem ...string) string {
 			a.Log.Panic(err)
 		}
 
-		return filepath.Join(append([]string{cwd, "res", "static"}, elem...)...)
+		return filepath.Join(append([]string{cwd, "statics"}, elem...)...)
 	}
 
-	return filepath.Join(append([]string{platform.DATA_DIR, a.ID}, elem...)...)
+	return filepath.Join(append([]string{platform.DATA_DIR, a.ID, "statics"}, elem...)...)
 }
 
 func (a App) Quit() {
