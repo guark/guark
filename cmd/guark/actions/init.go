@@ -170,11 +170,11 @@ func confirmAndRunSetupCommands(out *utils.Output, s SetupCommands, dest string)
 	fmt.Println("⏺ Setup commands (Verify them before confirm):")
 
 	for _, v := range s.Commands {
-		ln := `  - "%s"`
+		ln := fmt.Sprintf(`  - "%s"`, v.Cmd)
 		if v.Dir != "" {
-			ln += "(dir: %s)"
+			ln = fmt.Sprintf("%s (dir: %s)", ln, v.Dir)
 		}
-		fmt.Println(fmt.Sprintf(ln, v.Cmd, v.Dir))
+		fmt.Println(ln)
 	}
 
 	prompt := promptui.Prompt{
@@ -215,7 +215,6 @@ func runSetupCommand(dir string, c []string, env []string) error {
 	cmd := exec.Command(c[0], c[1:]...)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), env...)
-	cmd.Stdout = ioutil.Discard
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }

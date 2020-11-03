@@ -14,7 +14,6 @@ import (
 
 var app *cli.App
 
-// TODO: add bundle cmd
 func init() {
 
 	app = &cli.App{
