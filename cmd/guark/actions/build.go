@@ -14,7 +14,6 @@ import (
 	"github.com/guark/guark/cmd/guark/builders"
 	. "github.com/guark/guark/cmd/guark/utils"
 	"github.com/guark/guark/utils"
-	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -69,10 +68,8 @@ func before(b *builders.Build) (err error) {
 	// Handle if dest already exists.
 	if utils.IsDir(b.Dest) {
 
-		if b.Clean {
-
-		} else if err = confirmDeleteDest(b.Dest); err != nil {
-			return
+		if !b.Clean {
+			return fmt.Errorf(`Dest "%[1]s/" already exists. try with: "--rm" flag, or remove "%[1]s/".`, b.Dest)
 		}
 
 		os.RemoveAll(b.Dest)
@@ -165,31 +162,6 @@ func run(builder builders.Builder) (err error) {
 	}
 
 	return builder.Run()
-}
-
-func confirmDeleteDest(dest string) error {
-
-	prompt := promptui.Prompt{
-		Label:     fmt.Sprintf("Confirm deleting: %s", dest),
-		IsConfirm: true,
-		Validate: func(v string) error {
-
-			if v == "y" {
-				return fmt.Errorf("Are you sure? type uppercase Y.")
-			}
-
-			return nil
-		},
-		Templates: &promptui.PromptTemplates{
-			Success: `{{ green "✔"}} {{ cyan "Delete existing dest:" }} `,
-		},
-	}
-
-	if yes, err := prompt.Run(); yes != "Y" || err != nil {
-		return fmt.Errorf("aborted")
-	}
-
-	return nil
 }
 
 func unmarshalBuildFile(c interface{}) error {

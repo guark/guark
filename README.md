@@ -48,7 +48,7 @@ Guark backend and logic part handled by native Go code, while the user interface
 go get -u github.com/guark/guark/cmd/guark
 ```
 
-#### 2. Some Gnu/Linux ❤ Requirements:
+#### 2. Some Requirements:
 
 ```bash
 // fedora
@@ -56,6 +56,9 @@ sudo dnf install gtk3-devel webkit2gtk3-devel gcc-c++ pkgconf-pkg-config
 
 // Ubuntu
 sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev build-essential
+
+// Windows
+// https://jmeubank.github.io/tdm-gcc/download/
 ```
 
 ## Getting Started
@@ -66,7 +69,7 @@ After installing guark CLI tool, the next step is to create a new guark project 
 
 ```bash
 # cd to empty directory and run:
-guark init --template vue
+guark init --template vue --mod github.com/username/appname
 ```
 
 ### Start Dev Server
@@ -110,8 +113,9 @@ var Funcs = app.Funcs{
 import g from "guark"
 
 g.call("foo")
- .then(res => console.log(res))
- .catch(err => console.error(err))
+    .then(res => console.log(res))
+    .catch(err => console.error(err))
+
 ```
 
 See Vue template as an example: https://github.com/guark/vue
@@ -138,6 +142,9 @@ After building your app you can bundle your windows app into msi using WIX.
 ```bash
 guark bundle
 ```
+
+#### Wix required!
+Install it from: https://wixtoolset.org/
 
 ## Cross Compiling To Windows From Gnu/Linux:
 
