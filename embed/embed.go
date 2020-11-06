@@ -8,6 +8,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io/ioutil"
+	"runtime"
 	"strings"
 	"text/template"
 
@@ -52,8 +53,13 @@ func (e Embed) Build(files []string) ([]byte, error) {
 		w.Write(data)
 		w.Close()
 
+		id := strings.Replace(files[i], e.Root, "", 1)
+		if runtime.GOOS == "windows" {
+			id = strings.Replace(id, `\`, "/", -1)
+		}
+
 		embeds = append(embeds, &Item{
-			ID:   strings.Replace(files[i], e.Root, "", 1),
+			ID:   id,
 			Path: files[i],
 			Data: gzdata.Bytes(),
 		})
