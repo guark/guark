@@ -101,7 +101,7 @@ func New(c *cli.Context) (err error) {
 
 	out.Done("App module name refactored")
 
-	if err = runSetupCommands(out, dest, c.Bool("no-setup") == true); err == nil {
+	if err = runSetupCommands(out, dest, c.Bool("no-setup") == false); err == nil {
 		out.Done(fmt.Sprintf("Done! cd to %s and run `guark run`.", dest))
 	}
 
