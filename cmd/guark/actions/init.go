@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/guark/guark/cmd/guark/utils"
-	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -34,6 +33,10 @@ var (
 			Name:  "mod",
 			Usage: "Your app module name.",
 		},
+		&cli.BoolFlag{
+			Name:  "no-setup",
+			Usage: "Do not run template setup commands",
+		},
 	}
 )
 
@@ -49,9 +52,9 @@ type SetupCommands struct {
 func New(c *cli.Context) (err error) {
 
 	var (
-		out      = utils.NewWriter()
-		dest     = utils.Path(c.String("dest"))
-		template string
+		out              = utils.NewWriter()
+		dest             = utils.Path(c.String("dest"))
+		module, template string
 	)
 
 	defer out.Stop()
@@ -64,6 +67,11 @@ func New(c *cli.Context) (err error) {
 	} else if isCleanDir(dest) == false {
 
 		err = fmt.Errorf("Destination path %s is not empty!", dest)
+		return
+
+	} else if module = c.String("mod"); module == "" {
+
+		err = fmt.Errorf("App module name required. for eg: `guark new --mod example.com/usr/pkg`")
 		return
 	}
 
@@ -87,29 +95,13 @@ func New(c *cli.Context) (err error) {
 
 	out.Done("Template downloaded successfully.")
 
-	prompt := promptui.Prompt{
-		Label:     "Change the app module name to yours:",
-		Default:   "github.com/melbahja/myapp",
-		AllowEdit: true,
-		Templates: &promptui.PromptTemplates{
-			Valid:   "⏺ {{ . | cyan }}: ",
-			Success: `{{ green "✔"}} {{ cyan "App module name:" }} `,
-		},
-	}
-
-	mod, err := prompt.Run()
-
-	if err != nil {
+	if err = refactorMod(strings.TrimSpace(module), dest); err != nil {
 		return
 	}
 
-	err = refactorMod(strings.TrimSpace(mod), dest)
-
 	out.Done("App module name refactored")
 
-	err = runSetupCommands(out, dest)
-
-	if err == nil {
+	if err = runSetupCommands(out, dest, c.Bool("no-setup") == true); err == nil {
 		out.Done(fmt.Sprintf("Done! cd to %s and run `guark run`.", dest))
 	}
 
@@ -129,7 +121,7 @@ func refactorMod(mod string, dest string) error {
 
 			return err
 
-		} else if f.IsDir() || strings.Contains(path, ".git/") {
+		} else if f.IsDir() || strings.Contains(path, ".git") {
 
 			return nil
 		}
@@ -144,30 +136,30 @@ func refactorMod(mod string, dest string) error {
 	})
 }
 
-func runSetupCommands(out *utils.Output, dir string) error {
+func runSetupCommands(out *utils.Output, dest string, runComamnds bool) error {
 
-	data, err := ioutil.ReadFile(filepath.Join(dir, "guark-build.yaml"))
+	data, err := ioutil.ReadFile(filepath.Join(dest, "guark-build.yaml"))
 
 	if err != nil {
 		return err
 	}
 
-	sup := SetupCommands{}
+	scmd := SetupCommands{}
 
-	if err = yaml.Unmarshal(data, &sup); err != nil {
+	if err = yaml.Unmarshal(data, &scmd); err != nil {
 		return err
 	}
 
-	if len(sup.Commands) > 0 {
-		err = confirmAndRunSetupCommands(out, sup, dir)
+	if len(scmd.Commands) > 0 {
+		err = showAndRunSetupCommands(out, scmd, dest, runComamnds)
 	}
 
 	return err
 }
 
-func confirmAndRunSetupCommands(out *utils.Output, s SetupCommands, dest string) error {
+func showAndRunSetupCommands(out *utils.Output, s SetupCommands, dest string, runComamnds bool) (err error) {
 
-	fmt.Println("⏺ Setup commands (Verify them before confirm):")
+	fmt.Println("⏺ Setup commands:")
 
 	for _, v := range s.Commands {
 		ln := fmt.Sprintf(`  - "%s"`, v.Cmd)
@@ -177,31 +169,12 @@ func confirmAndRunSetupCommands(out *utils.Output, s SetupCommands, dest string)
 		fmt.Println(ln)
 	}
 
-	prompt := promptui.Prompt{
-		Label:     "Do you want to run this commands on your machine (Enter for No)",
-		IsConfirm: true,
-		Validate: func(v string) error {
-
-			if v == "y" {
-				return fmt.Errorf("Are you sure? type uppercase Y.")
-			}
-
-			return nil
-		},
-	}
-
-	yes, err := prompt.Run()
-
-	if err != nil {
-
-		return err
-
-	} else if yes == "Y" {
+	if runComamnds {
 
 		out.Update("Running setup commands...")
 
 		for _, v := range s.Commands {
-			out.Update(fmt.Sprintf("Running setup command: %s", v.Cmd))
+			out.Done(fmt.Sprintf("Running setup command: %s", v.Cmd))
 			if err = runSetupCommand(filepath.Join(dest, v.Dir), strings.Split(v.Cmd, " "), v.Env); err != nil {
 				break
 			}
