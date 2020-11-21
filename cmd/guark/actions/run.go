@@ -68,30 +68,28 @@ func Dev(c *cli.Context) error {
 
 		cmd, cancel = serve(c.String("pkg"), port)
 		defer teardown(cmd, cancel)
-	}
 
-	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+		signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-sig
+			fmt.Println()
+			teardown(cmd, cancel)
+			out.Done("Cleanup before exit.")
+			os.Exit(1)
+		}()
 
-	go func() {
-		<-sig
-		fmt.Println()
-		teardown(cmd, cancel)
-		out.Done("Cleanup before exit.")
-		os.Exit(1)
-	}()
+		out.Stop()
 
-	out.Stop()
+		for {
+			time.Sleep(500 * time.Millisecond)
 
-	for {
-
-		time.Sleep(500 * time.Millisecond)
-
-		if utils.IsPortOpen(fmt.Sprintf("127.0.0.1:%s", port), 5) && utils.IsFile(lock) {
-			break
+			if utils.IsPortOpen(fmt.Sprintf("127.0.0.1:%s", port), 5) && utils.IsFile(lock) {
+				break
+			}
 		}
-	}
 
-	out.Done("UI server started successfully.")
+		out.Done("UI server started successfully.")
+	}
 
 	return start(port, out)
 }
