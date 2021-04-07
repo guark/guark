@@ -68,6 +68,6 @@ func (l Log) SetLevel(n string) {
 
 func New(label string) Logger {
 	return &Log{
-		entry: logrus.WithFields(logrus.Fields{"lebel": label}),
+		entry: logrus.WithFields(logrus.Fields{"label": label}),
 	}
 }
