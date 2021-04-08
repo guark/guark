@@ -26,6 +26,10 @@ func (e HybridEngine) Bind(name string, fn app.Func) error {
 	return e.engine.Bind(name, fn)
 }
 
+func (e *HybridEngine) Eval(js string) {
+	e.engine.Eval(js)
+}
+
 func (e HybridEngine) Quit() {
 	e.engine.Quit()
 }

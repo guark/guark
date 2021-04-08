@@ -63,6 +63,10 @@ func (e *ChromeEngine) Bind(name string, fn app.Func) error {
 	})
 }
 
+func (e *ChromeEngine) Eval(js string) {
+	e.ui.Eval(js)
+}
+
 func (e *ChromeEngine) Quit() {
 
 	if e.quited {
