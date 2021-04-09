@@ -57,6 +57,10 @@ func (e *WebviewEngine) Bind(name string, fn app.Func) error {
 	})
 }
 
+func (e *WebviewEngine) Eval(js string) {
+	e.webview.Eval(js)
+}
+
 func (e *WebviewEngine) Quit() {
 
 	if e.quited {
