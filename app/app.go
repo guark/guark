@@ -62,6 +62,14 @@ func (a *App) Run() error {
 	return a.engine.Run()
 }
 
+func (a *App) GetEngine() Engine {
+	return a.engine
+}
+
+func (a *App) ExecJS(js string) {
+	a.engine.Eval(js)
+}
+
 func (a *App) Use(engine Engine) error {
 
 	a.engine = engine

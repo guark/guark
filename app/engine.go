@@ -7,5 +7,6 @@ type Engine interface {
 	Init() error
 	Run() error
 	Bind(name string, fn Func) error
+	Eval(js string)
 	Quit()
 }
