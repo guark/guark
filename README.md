@@ -60,6 +60,15 @@ sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev build-essential
 // Windows
 // https://jmeubank.github.io/tdm-gcc/download/
 ```
+Open a console and make sure the tdm-gcc tools chain are in the PATH:
+
+```
+gcc --version
+gcc (tdm64-1) 10.3.0
+Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
 
 ## Getting Started
 
@@ -130,6 +139,57 @@ You can change the engine in `guark.yaml` file.
 
 
 ## Build Your App
+
+### Configure the build
+
+guark-build.yaml contains all configuration and path required for the build, like the compilers or default platform.
+
+The C/C++ compilers are not using the PATH environment and need an absolute path to them, on linux it will use the default paths for Linux builds.
+
+For cross platform build, it will look like:
+
+```
+linux:
+  ldflags: ""
+
+darwin:
+  ldflags: ""
+
+windows:
+  cc: /usr/bin/x86_64-w64-mingw32-gcc
+  cxx: /usr/bin/x86_64-w64-mingw32-g++
+  ldflags: "-H windowsgui"
+  windres: /usr/bin/x86_64-w64-mingw32-windres
+```
+
+Update these paths accordingly (check the GCC/distributions documentations for the right paths)
+
+On Windows, make sure to have installed tdm-gcc, once done, update the guark-build.yaml:
+
+```
+# Guark build config file.
+
+setup:
+  - cmd: yarn install
+    dir: ui
+  - cmd: go mod download
+  - cmd: go mod tidy
+  - cmd: go mod verify
+
+linux:
+  ldflags: ""
+
+darwin:
+  ldflags: ""
+
+windows:
+  cc: C:\apps\tdm-gcc1030\bin\gcc
+  cxx: C:\apps\tdm-gcc1030\bin\g++
+  ldflags: "-H windowsgui"
+  windres: C:\apps\tdm-gcc1030\bin\windres.exe
+```
+
+### Build
 
 You can build your app with
 ```bash
