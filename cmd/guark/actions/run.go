@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	. "github.com/guark/guark/cmd/guark/utils"
+	cmdutils "github.com/guark/guark/cmd/guark/utils"
 	"github.com/guark/guark/embed"
 	"github.com/guark/guark/utils"
 	"github.com/urfave/cli/v2"
@@ -25,6 +25,10 @@ var (
 			Usage: "Set your package manager.",
 			Value: "yarn",
 		},
+		&cli.StringFlag{
+			Name:  "port",
+			Usage: "Set you ui server port.",
+		},
 	}
 )
 
@@ -36,9 +40,10 @@ func Dev(c *cli.Context) error {
 
 	var (
 		err      error
-		out      = NewWriter()
+		out      = cmdutils.NewWriter()
 		sig      = make(chan os.Signal)
-		lock     = Path("ui", "guark.lock")
+		lock     = cmdutils.Path("ui", "guark.lock")
+		port     = c.String("port")
 		cmd      *exec.Cmd
 		cancel   context.CancelFunc
 		teardown = func(c *exec.Cmd, cancel context.CancelFunc) {
@@ -47,45 +52,44 @@ func Dev(c *cli.Context) error {
 		}
 	)
 
-	if err = embed.GenerateEmbed([]string{"guark.yaml"}, Path("lib", "embed.go"), "lib", ""); err != nil {
+	if err = embed.GenerateEmbed([]string{"guark.yaml"}, cmdutils.Path("lib", "embed.go"), "lib", ""); err != nil {
 		return err
 	}
 
-	port, err := utils.GetNewPort()
+	if port == "" {
 
-	if err != nil {
-		return err
-	}
-
-	out.Update("Waiting for UI dev server to start...")
-
-	os.Remove(lock)
-
-	cmd, cancel = serve(c.String("pkg"), port)
-	defer teardown(cmd, cancel)
-
-	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		<-sig
-		fmt.Println()
-		teardown(cmd, cancel)
-		out.Done("Cleanup before exit.")
-		os.Exit(1)
-	}()
-
-	out.Stop()
-
-	for {
-
-		time.Sleep(500 * time.Millisecond)
-
-		if utils.IsPortOpen(fmt.Sprintf("127.0.0.1:%s", port), 5) && utils.IsFile(lock) {
-			break
+		port, err = utils.GetNewPort()
+		if err != nil {
+			return err
 		}
-	}
 
-	out.Done("UI server started successfully.")
+		out.Update("Waiting for UI dev server to start...")
+		os.Remove(lock)
+
+		cmd, cancel = serve(c.String("pkg"), port)
+		defer teardown(cmd, cancel)
+
+		signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-sig
+			fmt.Println()
+			teardown(cmd, cancel)
+			out.Done("Cleanup before exit.")
+			os.Exit(1)
+		}()
+
+		out.Stop()
+
+		for {
+			time.Sleep(500 * time.Millisecond)
+
+			if utils.IsPortOpen(fmt.Sprintf("127.0.0.1:%s", port), 5) && utils.IsFile(lock) {
+				break
+			}
+		}
+
+		out.Done("UI server started successfully.")
+	}
 
 	return start(port, out)
 }
@@ -97,14 +101,14 @@ func serve(pkg string, port string) (*exec.Cmd, context.CancelFunc) {
 	)
 
 	cmd := exec.CommandContext(ctx, pkg, "run", "serve", "--host", "127.0.0.1", "--port", port)
-	cmd.Dir = Path("ui")
+	cmd.Dir = cmdutils.Path("ui")
 	cmd.Stderr = os.Stderr
 	cmd.Start()
 
 	return cmd, cancel
 }
 
-func start(port string, out *Output) error {
+func start(port string, out *cmdutils.Output) error {
 	cfg := new(EngineConfig)
 	utils.UnmarshalGuarkFile("", &cfg)
 	cmd := exec.Command("go", "run", "-tags", fmt.Sprintf("dev %s", cfg.Name), "app.go")

@@ -46,6 +46,12 @@ func init() {
 				Flags:  actions.NewFlags,
 				Action: actions.New,
 			},
+			{
+				Name:   "serve",
+				Usage:  "Serve directory over local http server.",
+				Flags:  actions.ServeFlags,
+				Action: actions.Serve,
+			},
 		},
 	}
 }
