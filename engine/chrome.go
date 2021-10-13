@@ -22,10 +22,16 @@ type ChromeEngine struct {
 }
 
 func (e *ChromeEngine) Init() error {
+	var (
+		profile string
+		err     error
+	)
 
-	profile, err := e.app.DataFile("_profile")
-	if err != nil {
-		return err
+	if !boolVal(e.app.EngineConfig["temporary_profile"], false) {
+		profile, err = e.app.DataFile("_profile")
+		if err != nil {
+			return err
+		}
 	}
 
 	e.ui, err = lorca.New(

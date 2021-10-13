@@ -25,6 +25,20 @@ func intVal(i interface{}, def int) int {
 	return v
 }
 
+func boolVal(i interface{}, def bool) bool {
+
+	if i == nil {
+		return def
+	}
+
+	v, ok := i.(bool)
+	if !ok {
+		v = def
+	}
+
+	return v
+}
+
 func newServer(a *app.App) (srv *server.Server, addr string) {
 
 	if a.IsDev() {
