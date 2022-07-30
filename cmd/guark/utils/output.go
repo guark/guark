@@ -22,7 +22,7 @@ type Output struct {
 
 func (o Output) Update(s string) {
 
-	if o.spinner.Active() == false {
+	if o.spinner.Status().String() == "running" {
 		o.spinner.Start()
 	}
 
