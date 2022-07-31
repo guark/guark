@@ -6,6 +6,7 @@ package app
 type Engine interface {
 	Init() error
 	Run() error
+	Eval(js string)
 	Bind(name string, fn Func) error
 	Quit()
 }

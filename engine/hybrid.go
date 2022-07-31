@@ -1,6 +1,7 @@
 // Copyright 2020 Mohammed El Bahja. All rights reserved.
 // Use of this source code is governed by a MIT license.
 //
+//go:build hybrid
 // +build hybrid
 
 package engine
