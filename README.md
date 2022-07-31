@@ -45,7 +45,7 @@ Guark backend and logic part handled by native Go code, while the user interface
 
 #### 1. Install guark CLI tool:
 ```bash
-go get -u github.com/guark/guark/cmd/guark
+go install github.com/guark/guark/cmd/guark@latest
 ```
 
 #### 2. Some Requirements:
